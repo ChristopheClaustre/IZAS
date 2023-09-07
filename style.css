@@ -26,6 +26,8 @@ ul li{
 }
 
 iframe {
+    width:90%;
+    height:80vh;
     display: block;
     border-style:none;
     margin: auto;
