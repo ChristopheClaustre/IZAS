@@ -6,13 +6,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebas
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyBAbdk6cY69KIrCgbAZFXMQgXSXI-qN9LI",
-    authDomain: "izas-6e7b5.firebaseapp.com",
-    projectId: "izas-6e7b5",
-    storageBucket: "izas-6e7b5.appspot.com",
-    messagingSenderId: "911743921374",
-    appId: "1:911743921374:web:d81c1ed25bc501b258e64f"
+    apiKey: "AIzaSyAPa6Nd30O1YrC8K1HIB052dZ6KCkyUFcA",
+    authDomain: "izas-398321.firebaseapp.com",
+    databaseURL: "https://izas-398321-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "izas-398321",
+    storageBucket: "izas-398321.appspot.com",
+    messagingSenderId: "119715811198",
+    appId: "1:119715811198:web:a187efcf590e6f62f8ed2f"
 };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
