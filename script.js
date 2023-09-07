@@ -6,7 +6,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebas
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyAd_Cg6dKfDOwwanQyaCDVSzk0o6JR3VuI",
+    apiKey: "AIzaSyBAbdk6cY69KIrCgbAZFXMQgXSXI-qN9LI",
     authDomain: "izas-6e7b5.firebaseapp.com",
     projectId: "izas-6e7b5",
     storageBucket: "izas-6e7b5.appspot.com",
