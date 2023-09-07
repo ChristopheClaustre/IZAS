@@ -24,3 +24,8 @@ ul li{
     margin-bottom: 10px;
     margin-left: 50px;
 }
+
+iframe {
+    display: block;
+    border-style:none;
+}
