@@ -28,4 +28,5 @@ ul li{
 iframe {
     display: block;
     border-style:none;
+    margin: auto;
 }
