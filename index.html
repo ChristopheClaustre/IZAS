@@ -15,7 +15,7 @@
         <th><img src="header.png" style="width: 50px; height: 50px;"></th>
       </tr></table>
     </div>
-    <div>
+    <!--<div>
       <iframe
         width="1000px"
         height="800px"
@@ -25,6 +25,16 @@
         src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCJevSj89wDoaoxPWJ7K0mHz7RFdZ1fyw0
           &q=Place+du+Capitole,Toulouse">
       </iframe>
-    </div>
+    </div>-->
+    <div id="street-view"></div>
+
+    <!-- 
+      The `defer` attribute causes the callback to execute after the full HTML
+      document has been parsed. For non-blocking uses, avoiding race conditions,
+      and consistent behavior across browsers, consider loading using Promises.
+      See https://developers.google.com/maps/documentation/javascript/load-maps-js-api
+      for more information.
+      -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initialize&v=weekly" defer></script>
   </body>
 </html>
