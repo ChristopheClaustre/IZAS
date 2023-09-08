@@ -37,3 +37,8 @@ table {
     margin-left: auto;
     margin-right: auto;
 }
+
+.flipped {
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
