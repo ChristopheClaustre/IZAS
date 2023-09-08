@@ -32,3 +32,8 @@ iframe {
     border-style:none;
     margin: auto;
 }
+
+table {
+    margin-left: auto;
+    margin-right: auto;
+}
