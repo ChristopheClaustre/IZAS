@@ -1,19 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js';
 
-// Create the streetview at initialization time
-let panorama;
-function initialize() {
-  panorama = new google.maps.StreetViewPanorama(
-    document.getElementById("street-view"),
-    {
-      position: { lat: 37.86926, lng: -122.254811 },
-      pov: { heading: 165, pitch: 0 },
-      zoom: 1,
-    },
-  );
-}
-window.initialize = initialize;
-
 // Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAPa6Nd30O1YrC8K1HIB052dZ6KCkyUFcA",
