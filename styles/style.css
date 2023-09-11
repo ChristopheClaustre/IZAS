@@ -3,6 +3,7 @@ body {
     height: 98%;
     width: 98%;
     margin: 0;
+    padding: 0;
     padding-left: 1%;
     padding-right: 1%;
 }
@@ -24,14 +25,22 @@ h1, h2{
     font-weight: 400;
 }
 
-table {
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .flipped {
     -webkit-transform: scaleX(-1);
     transform: scaleX(-1);
+}
+
+.flex_row_centered {
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding-left: 15px;
+}
+
+.flex_row_centered * {
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 #header {
