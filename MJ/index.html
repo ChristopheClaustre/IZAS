@@ -8,22 +8,26 @@
     <script type="module" src="../scripts/script.js"></script>
   </head>
   <body>
-    <div>
+    <div id="header">
       <table><tr>
         <th><img class="flipped" src="../img/header.png" style="width: 50px; height: 50px;"></th>
         <th><h1>IZAS - MJ</h1></th>
         <th><img src="../img/header.png" style="width: 50px; height: 50px;"></th>
       </tr></table>
     </div>
-    <div>
-      <iframe
-        width="1000px"
-        height="800px"
-        loading="lazy"
-        allowfullscreen=""
-        referrerpolicy="no-referrer-when-downgrade"
-        src="https://www.google.com/maps/embed?pb=!4v1694175323778!6m8!1m7!1sCAoSLEFGMVFpcE5zYVp4TG9BVnQ5RC1nR1VFOXNmTHV3NEM3ZVFwbEtFVUMyUGtz!2m2!1d43.604458!2d1.4433945!3f130.591873701186!4f0!5f0.7820865974627469">
-      </iframe>
-    </div>
+    <div id="map"></div>
+    <div id="pano"></div>
+
+    <!--
+      The `defer` attribute causes the callback to execute after the full HTML
+      document has been parsed. For non-blocking uses, avoiding race conditions,
+      and consistent behavior across browsers, consider loading using Promises.
+      See https://developers.google.com/maps/documentation/javascript/load-maps-js-api
+      for more information.
+      -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJevSj89wDoaoxPWJ7K0mHz7RFdZ1fyw0&callback=initializeMJ&v=weekly"
+      defer
+    ></script>
   </body>
 </html>

@@ -1,36 +1,27 @@
+html,
+body {
+    height: 98%;
+    width: 98%;
+    margin: 0;
+    padding-left: 1%;
+    padding-right: 1%;
+}
+
 body{
     background-color: lightblue;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.content-wrapper{
-    padding: 10px 30px;
-}
+
 p{
     text-align: justify;
 }
+
 h1{
     text-align: center;
 }
-.highlight{
-    font-weight: 700;
-    color: forestgreen;
-}
+
 h1, h2{
     font-weight: 400;
-}
-
-ul li{
-    list-style-type: square;
-    margin-bottom: 10px;
-    margin-left: 50px;
-}
-
-iframe {
-    width:90%;
-    height:80vh;
-    display: block;
-    border-style:none;
-    margin: auto;
 }
 
 table {
@@ -39,6 +30,23 @@ table {
 }
 
 .flipped {
-  -webkit-transform: scaleX(-1);
-  transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+}
+
+#header {
+    height: 10%;
+    width: 100%;
+}
+
+#map,
+#pano {
+    float: left;
+    height: 90%;
+    width: 50%;
+}
+
+#pano-pj {
+    height: 90%;
+    width: 100%;
 }
