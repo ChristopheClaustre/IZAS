@@ -1,28 +1,11 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js';
-import { getDatabase, ref, onValue, get, set } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+import { getDatabase, ref, onValue, get, set, push } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyAPa6Nd30O1YrC8K1HIB052dZ6KCkyUFcA",
-    authDomain: "izas-398321.firebaseapp.com",
-    databaseURL: "https://izas-398321-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "izas-398321",
-    storageBucket: "izas-398321.appspot.com",
-    messagingSenderId: "119715811198",
-    appId: "1:119715811198:web:a187efcf590e6f62f8ed2f"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase();
-const latitudeRef = ref(db, 'pegman/lat');
-const longitudeRef = ref(db, 'pegman/lng');
-var panorama = null;
-var map = null;
-var pegman = { lat: 42.345573, lng: -71.098326 };
-
-// Initialize MJ page
+// Initialize MJ and PJ functions
 function initializeMJ() {
+  const latitudeRef = ref(db, id + '/pegman/lat');
+  const longitudeRef = ref(db, id + '/pegman/lng');
+  
   // Create maps objects
   map = new google.maps.Map(document.getElementById("map"), {
     center: pegman,
@@ -56,7 +39,7 @@ function initializeMJ() {
       map.setCenter(pegman);
       pos_initialized++;
     } else {
-      console.log("No latitude data available");
+      throwError("Party ID \"" + id + "\" does not exists.");
     }
   }).catch((error) => {
     console.error(error);
@@ -68,7 +51,7 @@ function initializeMJ() {
       map.setCenter(pegman);
       pos_initialized++;
     } else {
-      console.log("No longitude data available");
+      throwError("Party ID \"" + id + "\" does not exists.");
     }
   }).catch((error) => {
     console.error(error);
@@ -87,10 +70,10 @@ function initializeMJ() {
   });
 }
 
-window.initializeMJ = initializeMJ;
-
-// Initialize PJ page
 function initializePJ() {
+  const latitudeRef = ref(db, id + '/pegman/lat');
+  const longitudeRef = ref(db, id + '/pegman/lng');
+  
   // Create maps objects
   const fenway = { lat: 42.345573, lng: -71.098326 };
   panorama = new google.maps.StreetViewPanorama(
@@ -139,15 +122,87 @@ function initializePJ() {
 
   // Synchronize position with firebase
   onValue(latitudeRef, (snapshot) => {
+    if (! snapshot.exists()) throwError("Party ID \"" + id + "\" does not exists.");
     const data = snapshot.val();
     pegman.lat = data;
     panorama.setPosition(pegman);
   });
   onValue(longitudeRef, (snapshot) => {
+    if (! snapshot.exists()) throwError("Party ID \"" + id + "\" does not exists.");
     const data = snapshot.val();
     pegman.lng = data;
     panorama.setPosition(pegman);
   });
 }
 
-window.initializePJ = initializePJ;
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAPa6Nd30O1YrC8K1HIB052dZ6KCkyUFcA",
+  authDomain: "izas-398321.firebaseapp.com",
+  databaseURL: "https://izas-398321-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "izas-398321",
+  storageBucket: "izas-398321.appspot.com",
+  messagingSenderId: "119715811198",
+  appId: "1:119715811198:web:a187efcf590e6f62f8ed2f"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase();
+var panorama = null;
+var map = null;
+var pegman = { lat: 42.345573, lng: -71.098326 };
+
+// Are we on player or game master pages ?
+var player = true;
+var pathname = window.location.pathname;
+if (pathname.startsWith("/IZAS/PJ") || pathname.startsWith("/PJ"))
+{
+  player = true;
+}
+else if (pathname.startsWith("/IZAS/MJ") || pathname.startsWith("/MJ"))
+{
+  player = false;
+}
+else
+{
+  throwError("Impossible to detect if you are a player or game master.");
+}
+
+// Manage query string (and retrieve party ID if possible)
+const urlParams = new URLSearchParams(window.location.search);
+var id = urlParams.get("id", "");
+
+if ( ! urlParams.has("id") )
+{
+  if (player) // Not allowed, return to main page
+  {
+    throwError("No Party ID set.");
+  }
+  else
+  {
+    var defaultPosition = {pegman: { lat : 43.604579144543436, lng : 1.443364389561114 }};
+    var newgameRef = push(ref(db));
+    set(newgameRef, defaultPosition).then((snapshot) => {
+      window.open(window.location.protocol + "//" + window.location.host + window.location.pathname + "?id=" + newgameRef.key, "_self");
+    }).catch((error) => {
+      throwError("Error when creating new party (" + error + ")");
+    });
+  }
+}
+else
+{
+  id = urlParams.get("id", "");
+  console.log("id: " + id);
+  
+  if (player)
+  {
+    window.initializePJ = initializePJ;
+  }
+  else
+  {
+    document.getElementById("party-id").value = id;
+    bindEvent(document.getElementById("copy-party-id"), 'click', () => navigator.clipboard.writeText(homepage + "PJ/?id=" + id));
+    window.initializeMJ = initializeMJ;
+  }
+}

@@ -35,7 +35,6 @@ h1, h2{
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding-left: 15px;
 }
 
 .flex_row_centered * {
@@ -43,15 +42,28 @@ h1, h2{
     margin-right: 10px;
 }
 
+.flex_column_centered {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 #header {
     height: 10%;
     width: 100%;
 }
 
+#party-info {
+    height: 1.5%;
+    width: 100%;
+    margin: 0.25%
+}
+
 #map,
 #pano {
     float: left;
-    height: 90%;
+    height: 88%;
     width: 50%;
 }
 
