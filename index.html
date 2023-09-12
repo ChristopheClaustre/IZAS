@@ -13,8 +13,15 @@
       <img src="img/header.png" style="width: 50px; height: 50px;">
     </div>
     <div class="flex_column_centered">
-      <a href="PJ/">Joueur</a>
-      <a href="MJ/">Maitre du jeu</a>
+      <form class="flex_row_centered" action="/PJ/">
+        <label>Joueur ? Demande à ton MJ ton "Party ID" :</label>
+        <input type="text" id="partyID" name="partyID" required />
+        <input type="submit" value="Play !"/>
+      </form>
+      <div class="flex_row_centered">
+        <p>Maitre du jeu ?</p>
+        <a href="MJ/">Cliquez ici</a>
+      </div>
     </div>
   </body>
 </html>
