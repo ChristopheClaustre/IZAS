@@ -18,6 +18,8 @@
       <input style="color:grey;" type="text" id="partyID" name="partyID" readonly />
       <input type="button" id="copy-partyID" value="Copy"/>
     </div>
+    <input id="places-input" type="text" placeholder="Search Box" />
+    <input id="recenter-input" type="button" value="Center on player" />
     <div id="map"></div>
     <div id="pano"></div>
 
@@ -29,7 +31,7 @@
       for more information.
       -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJevSj89wDoaoxPWJ7K0mHz7RFdZ1fyw0&callback=initializeMJ&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJevSj89wDoaoxPWJ7K0mHz7RFdZ1fyw0&callback=initializeMJ&libraries=places&v=weekly"
       defer
     ></script>
   </body>

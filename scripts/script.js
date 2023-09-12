@@ -32,6 +32,28 @@ function initializeMJ() {
 
   map.setStreetView(panorama);
   
+  // Setup search box
+  const placesInput = document.getElementById("places-input");
+  const searchBox = new google.maps.places.SearchBox(placesInput);
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(placesInput);
+  map.addListener("bounds_changed", () => {
+    searchBox.setBounds(map.getBounds());
+  });
+  searchBox.addListener("places_changed", () => {
+    const places = searchBox.getPlaces();
+
+    if (places.length == 0) {
+      return;
+    }
+    
+    map.setCenter(places[0].geometry.location);
+  });
+  
+  // Setup recenter button
+  const recenterInput = document.getElementById("recenter-input");
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(recenterInput);
+  utils.bindEvent(recenterInput, "click", () => map.setCenter(panorama.position));
+  
   // Initialize position with firebase values
   var pos_initialized = 0;
   get(latitudeRef).then((snapshot) => {
