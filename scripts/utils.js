@@ -4,7 +4,11 @@ const homepage = window.location.protocol + "//" + window.location.host + (windo
 
 // Utils function
 
-function gotoHomepage() { window.open(homepage, "_self"); }
+function gotoUrl(url) { window.open(url, "_self"); }
+
+function gotoHomepage() { gotoUrl(homepage); }
+
+function constructUrl(player, partyID) { return homepage + (player ? "PJ" : "MJ") + "/?partyID=" + partyID; } 
 
 function throwError(msg)
 {

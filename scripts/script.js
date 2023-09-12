@@ -3,8 +3,8 @@ import { getDatabase, ref, onValue, get, set, push } from "https://www.gstatic.c
 
 // Initialize MJ and PJ functions
 function initializeMJ() {
-  const latitudeRef = ref(db, id + '/pegman/lat');
-  const longitudeRef = ref(db, id + '/pegman/lng');
+  const latitudeRef = ref(db, 'parties/' + partyID + '/pegman/lat');
+  const longitudeRef = ref(db, 'parties/' + partyID + '/pegman/lng');
   
   // Create maps objects
   map = new google.maps.Map(document.getElementById("map"), {
@@ -39,7 +39,7 @@ function initializeMJ() {
       map.setCenter(pegman);
       pos_initialized++;
     } else {
-      throwError("Party ID \"" + id + "\" does not exists.");
+      throwError("Party ID \"" + partyID + "\" does not exists.");
     }
   }).catch((error) => {
     console.error(error);
@@ -51,7 +51,7 @@ function initializeMJ() {
       map.setCenter(pegman);
       pos_initialized++;
     } else {
-      throwError("Party ID \"" + id + "\" does not exists.");
+      throwError("Party ID \"" + partyID + "\" does not exists.");
     }
   }).catch((error) => {
     console.error(error);
@@ -71,8 +71,8 @@ function initializeMJ() {
 }
 
 function initializePJ() {
-  const latitudeRef = ref(db, id + '/pegman/lat');
-  const longitudeRef = ref(db, id + '/pegman/lng');
+  const latitudeRef = ref(db, 'parties/' + partyID + '/pegman/lat');
+  const longitudeRef = ref(db, 'parties/' + partyID + '/pegman/lng');
   
   // Create maps objects
   const fenway = { lat: 42.345573, lng: -71.098326 };
@@ -122,13 +122,13 @@ function initializePJ() {
 
   // Synchronize position with firebase
   onValue(latitudeRef, (snapshot) => {
-    if (! snapshot.exists()) throwError("Party ID \"" + id + "\" does not exists.");
+    if (! snapshot.exists()) throwError("Party ID \"" + partyID + "\" does not exists.");
     const data = snapshot.val();
     pegman.lat = data;
     panorama.setPosition(pegman);
   });
   onValue(longitudeRef, (snapshot) => {
-    if (! snapshot.exists()) throwError("Party ID \"" + id + "\" does not exists.");
+    if (! snapshot.exists()) throwError("Party ID \"" + partyID + "\" does not exists.");
     const data = snapshot.val();
     pegman.lng = data;
     panorama.setPosition(pegman);
@@ -171,9 +171,9 @@ else
 
 // Manage query string (and retrieve party ID if possible)
 const urlParams = new URLSearchParams(window.location.search);
-var id = urlParams.get("id", "");
+var partyID = urlParams.get("partyID", "");
 
-if ( ! urlParams.has("id") )
+if ( ! urlParams.has("partyID") )
 {
   if (player) // Not allowed, return to main page
   {
@@ -182,9 +182,9 @@ if ( ! urlParams.has("id") )
   else
   {
     var defaultPosition = {pegman: { lat : 43.604579144543436, lng : 1.443364389561114 }};
-    var newgameRef = push(ref(db));
+    var newgameRef = push(ref(db, 'parties/'));
     set(newgameRef, defaultPosition).then((snapshot) => {
-      window.open(window.location.protocol + "//" + window.location.host + window.location.pathname + "?id=" + newgameRef.key, "_self");
+      gotoUrl(constructUrl(false, newgameRef.key));
     }).catch((error) => {
       throwError("Error when creating new party (" + error + ")");
     });
@@ -192,8 +192,7 @@ if ( ! urlParams.has("id") )
 }
 else
 {
-  id = urlParams.get("id", "");
-  console.log("id: " + id);
+  console.log("partyID: " + partyID);
   
   if (player)
   {
@@ -201,8 +200,8 @@ else
   }
   else
   {
-    document.getElementById("party-id").value = id;
-    bindEvent(document.getElementById("copy-party-id"), 'click', () => navigator.clipboard.writeText(homepage + "PJ/?id=" + id));
+    document.getElementById("partyID").value = partyID;
+    bindEvent(document.getElementById("copy-partyID"), 'click', () => navigator.clipboard.writeText(homepage + "PJ/?partyID=" + partyID));
     window.initializeMJ = initializeMJ;
   }
 }
