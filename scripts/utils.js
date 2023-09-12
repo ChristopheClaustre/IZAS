@@ -23,3 +23,21 @@ function bindEvent(element, type, handler) {
         element.attachEvent('on'+type, handler);
     }
 }
+
+function isPlayerPage()
+{
+  var pathname = window.location.pathname;
+  if (pathname.startsWith("/IZAS/PJ") || pathname.startsWith("/PJ"))
+  {
+    return true;
+  }
+  else if (pathname.startsWith("/IZAS/MJ") || pathname.startsWith("/MJ"))
+  {
+    return false;
+  }
+  else
+  {
+    console.log("Impossible to detect if you are a player or game master.");
+    return true; // Better to suppose that it is a player (less risky)
+  }
+}

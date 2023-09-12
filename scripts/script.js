@@ -153,29 +153,13 @@ var panorama = null;
 var map = null;
 var pegman = { lat: 42.345573, lng: -71.098326 };
 
-// Are we on player or game master pages ?
-var player = true;
-var pathname = window.location.pathname;
-if (pathname.startsWith("/IZAS/PJ") || pathname.startsWith("/PJ"))
-{
-  player = true;
-}
-else if (pathname.startsWith("/IZAS/MJ") || pathname.startsWith("/MJ"))
-{
-  player = false;
-}
-else
-{
-  throwError("Impossible to detect if you are a player or game master.");
-}
-
 // Manage query string (and retrieve party ID if possible)
 const urlParams = new URLSearchParams(window.location.search);
 var partyID = urlParams.get("partyID", "");
 
 if ( ! urlParams.has("partyID") )
 {
-  if (player) // Not allowed, return to main page
+  if (isPlayerPage()) // Not allowed, return to main page
   {
     throwError("No Party ID set.");
   }
@@ -192,16 +176,15 @@ if ( ! urlParams.has("partyID") )
 }
 else
 {
-  console.log("partyID: " + partyID);
+  document.getElementById("partyID").value = partyID;
+  bindEvent(document.getElementById("copy-partyID"), 'click', () => navigator.clipboard.writeText(constructUrl(true, partyID)));
   
-  if (player)
+  if (isPlayerPage())
   {
     window.initializePJ = initializePJ;
   }
   else
   {
-    document.getElementById("partyID").value = partyID;
-    bindEvent(document.getElementById("copy-partyID"), 'click', () => navigator.clipboard.writeText(homepage + "PJ/?partyID=" + partyID));
     window.initializeMJ = initializeMJ;
   }
 }
