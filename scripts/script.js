@@ -91,6 +91,19 @@ function initializeMJ() {
       set(longitudeRef, pegman.lng);
     }
   });
+  
+  // display resources
+  dbUtils.displayResources(partyID, "heal", (data) => document.getElementById("heal-count").innerHTML = data );
+  dbUtils.displayResources(partyID, "confort", (data) => document.getElementById("confort-count").innerHTML = data );
+  dbUtils.displayResources(partyID, "foods", (data) => document.getElementById("foods-count").innerHTML = data );
+  
+  // +/- resources
+  utils.bindEvent(document.getElementById("heal++"), 'click', () => dbUtils.incrResources(partyID, 'heal') );
+  utils.bindEvent(document.getElementById("heal--"), 'click', () => dbUtils.incrResources(partyID, 'heal', -1) );
+  utils.bindEvent(document.getElementById("confort++"), 'click', () => dbUtils.incrResources(partyID, 'confort') );
+  utils.bindEvent(document.getElementById("confort--"), 'click', () => dbUtils.incrResources(partyID, 'confort', -1) );
+  utils.bindEvent(document.getElementById("foods++"), 'click', () => dbUtils.incrResources(partyID, 'foods') );
+  utils.bindEvent(document.getElementById("foods--"), 'click', () => dbUtils.incrResources(partyID, 'foods', -1) );
 }
 
 function initializePJ() {
@@ -156,7 +169,15 @@ function initializePJ() {
     pegman.lng = data;
     panorama.setPosition(pegman);
   });
+  
+  // display resources
+  dbUtils.displayResources(partyID, "heal", (data) => document.getElementById("heal-count").innerHTML = data );
+  dbUtils.displayResources(partyID, "confort", (data) => document.getElementById("confort-count").innerHTML = data );
+  dbUtils.displayResources(partyID, "foods", (data) => document.getElementById("foods-count").innerHTML = data );
 }
+
+// Connect to firebase
+dbUtils.connectToDB();
 
 // Initialize maps values
 var panorama = null;
@@ -167,7 +188,8 @@ var pegman = dbUtils.defaultPegman;
 const urlParams = new URLSearchParams(window.location.search);
 var partyID = urlParams.get("partyID", "");
 
-if ( ! urlParams.has("partyID") )
+// Check partyID
+if ( ! partyID )
 {
   if (utils.isPlayerPage()) // Not allowed, return to main page
   {
@@ -175,19 +197,16 @@ if ( ! urlParams.has("partyID") )
   }
   else
   {
-    var newPartyRef = dbUtils.createParty();
-    set(newPartyRef, {pegman: dbUtils.defaultPegman}).then((snapshot) => {
-      utils.gotoUrl(utils.constructUrl(false, newPartyRef.key));
-    }).catch((error) => {
-      utils.throwError("Error when creating new party (" + error + ")");
-    });
+    dbUtils.createParty((newPartyID) => utils.gotoUrl(utils.constructMasterUrl(newPartyID)));
   }
 }
 else
 {
+  // Display partyID
   document.getElementById("partyID").value = partyID;
   utils.bindEvent(document.getElementById("copy-partyID"), 'click', () => navigator.clipboard.writeText(utils.constructUrl(true, partyID)));
-  
+
+  // Initialize for maps
   if (utils.isPlayerPage())
   {
     window.initializePJ = initializePJ;

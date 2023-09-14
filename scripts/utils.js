@@ -8,7 +8,8 @@ export function gotoUrl(url) { window.open(url, "_self"); }
 
 export function gotoHomepage() { gotoUrl(homepage); }
 
-export function constructUrl(player, partyID) { return homepage + (player ? "PJ" : "MJ") + "/?partyID=" + partyID; } 
+export function constructUrl(player, partyID) { return homepage + (player ? "PJ" : "MJ") + "/?partyID=" + partyID; }
+export function constructMasterUrl(partyID) { return homepage + "MJ/?partyID=" + partyID; }
 
 export function throwError(msg)
 {

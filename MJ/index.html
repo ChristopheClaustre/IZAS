@@ -9,14 +9,36 @@
   </head>
   <body>
     <div id="header" class="flex_row_centered">
-      <img class="flipped" src="../img/header.png" style="width: 50px; height: 50px;">
+      <img class="flipped l-icon" src="../img/header.png"/>
       <h1>IZAS - MJ</h1>
-      <img src="../img/header.png" style="width: 50px; height: 50px;">
+      <img class="l-icon" src="../img/header.png"/>
     </div>
-    <div class="flex_row_centered" id="party-info">
-      <label>Party ID: </label>
-      <input style="color:grey;" type="text" id="partyID" name="partyID" readonly />
-      <input type="button" id="copy-partyID" value="Copy"/>
+    <div class="flex_row_sbetween" id="party-info">
+      <div class="flex_row_centered">
+        <div class="flex_row_centered">
+          <img src="../img/heal.png" class="s-icon" title="Party's heal"/>
+          <input type="button" id="heal--" class="stacked-button" value="-"/>
+          <label id="heal-count">0</label>
+          <input type="button" id="heal++" class="stacked-button" value="+"/>
+        </div>
+        <div class="flex_row_centered">
+          <img src="../img/confort.png" class="s-icon" title="Party's confort"/>
+          <input type="button" id="confort--" class="stacked-button" value="-"/>
+          <label id="confort-count">0</label>
+          <input type="button" id="confort++" class="stacked-button" value="+"/>
+        </div>
+        <div class="flex_row_centered">
+          <img src="../img/foods.png" class="s-icon" title="Party's foods"/>
+          <input type="button" id="foods--" class="stacked-button" value="-"/>
+          <label id="foods-count">0</label>
+          <input type="button" id="foods++" class="stacked-button" value="+"/>
+        </div>
+      </div>
+      <div class="flex_row_centered">
+        <label>Party ID:</label>
+        <input style="color:grey;" type="text" id="partyID" name="partyID" readonly />
+        <input type="button" id="copy-partyID" value="Copy"/>
+      </div>
     </div>
     <input id="places-input" type="text" placeholder="Search Box" />
     <input id="recenter-input" type="button" value="Center on player" />

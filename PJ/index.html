@@ -13,10 +13,20 @@
       <h1>IZAS - PJ</h1>
       <img src="../img/header.png" style="width: 50px; height: 50px;">
     </div>
-    <div class="flex_row_centered" id="party-info">
-      <label>Party ID: </label>
-      <input style="color:grey;" type="text" id="partyID" name="partyID" readonly />
-      <input type="button" id="copy-partyID" value="Copy"/>
+    <div class="flex_row_sbetween" id="party-info">
+      <div class="flex_row_centered">
+        <img src="../img/heal.png" class="s-icon" title="Party's heal"/>
+        <label id="heal-count">0</label>
+        <img src="../img/confort.png" class="s-icon" title="Party's confort"/>
+        <label id="confort-count">0</label>
+        <img src="../img/foods.png" class="s-icon" title="Party's foods"/>
+        <label id="foods-count">0</label>
+      </div>
+      <div class="flex_row_centered">
+        <label>Party ID:</label>
+        <input style="color:grey;" type="text" id="partyID" name="partyID" readonly />
+        <input type="button" id="copy-partyID" value="Copy"/>
+      </div>
     </div>
     <div id="pano-pj"></div>
 

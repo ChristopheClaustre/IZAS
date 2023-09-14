@@ -25,6 +25,24 @@ h1, h2{
     font-weight: 400;
 }
 
+.l-icon {
+    width: 50px;
+    height: 50px;
+}
+
+.s-icon {
+    width: 25px;
+    height: 25px;
+}
+
+.stacked-button {
+    height: 25px;
+    width: 12.5px;
+    font-size: xx-small;
+    padding:0;
+    margin:0;
+}
+
 .flipped {
     -webkit-transform: scaleX(-1);
     transform: scaleX(-1);
@@ -37,9 +55,16 @@ h1, h2{
     align-items: center;
 }
 
+.flex_row_sbetween {
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .flex_row_centered * {
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 .flex_column_centered {
@@ -55,20 +80,28 @@ h1, h2{
 }
 
 #party-info {
-    height: 1.5%;
+    height: 2%;
     width: 100%;
-    margin: 0.25%;
+    margin: 0.5%;
+}
+
+#heal-count,
+#confort-count,
+#foods-count {
+    border: solid 1px;
+    width: 2em;
+    text-align: center;
 }
 
 #map,
 #pano {
     float: left;
-    height: 88%;
+    height: 87%;
     width: 50%;
 }
 
 #pano-pj {
-    height: 88%;
+    height: 87%;
     width: 100%;
 }
 
