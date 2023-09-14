@@ -187,6 +187,7 @@ var pegman = dbUtils.defaultPegman;
 // Manage query string (and retrieve party ID if possible)
 const urlParams = new URLSearchParams(window.location.search);
 var partyID = urlParams.get("partyID", "");
+var name = urlParams.get("name", "");
 
 // Check partyID
 if ( ! partyID )
@@ -200,6 +201,14 @@ if ( ! partyID )
     dbUtils.createParty((newPartyID) => utils.gotoUrl(utils.constructMasterUrl(newPartyID)));
   }
 }
+// Check player's name
+else if (utils.isPlayerPage() && ! name)
+{
+  while(!name) {
+    name = window.prompt("Entrez le nom de votre personage :", "");
+  }
+  dbUtils.createPlayer(partyID, name, (newPlayerID) => utils.gotoUrl(utils.constructPlayerUrl(partyID, name)));
+}
 else
 {
   // Display partyID
@@ -209,6 +218,9 @@ else
   // Initialize for maps
   if (utils.isPlayerPage())
   {
+    // Display name
+    document.getElementById("name").value = name;
+    
     window.initializePJ = initializePJ;
   }
   else

@@ -13,15 +13,27 @@
       <img src="img/header.png" style="width: 50px; height: 50px;">
     </div>
     <div class="flex_column_centered">
-      <form class="flex_row_centered" action="/PJ/">
-        <label>Joueur ? Demande à ton MJ ton "Party ID" :</label>
-        <input type="text" id="partyID" name="partyID" required />
+      <h2>- JOUEUR -</h2>
+      <form class="flex_column_centered" action="/PJ/" onsubmit="">
+        <div class="flex_row_centered">
+          <label>Party ID (demande à ton MJ) :</label>
+          <input type="text" id="partyID" name="partyID" required />
+        </div>
+        <div class="flex_row_centered">
+          <label>Pseudo :</label>
+          <input type="text" id="name" name="name" required />
+          <input type="button" id="random-name" value="Random"/>
+        </div>
         <input type="submit" value="Play !"/>
       </form>
-      <div class="flex_row_centered">
-        <p>Maitre du jeu ?</p>
-        <a href="MJ/">Cliquez ici</a>
-      </div>
+      <h2>- MAITRE DU JEU -</h2>
+      <a href="MJ/">Créer une partie</a>
     </div>
+    
+    <script type="module">
+      import { randomName } from "./scripts/dbUtils.js";
+      import { bindEvent } from "./scripts/utils.js";
+      bindEvent(document.getElementById("random-name"), 'click', () => document.getElementById("name").value = randomName());
+    </script>
   </body>
 </html>
