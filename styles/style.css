@@ -35,14 +35,6 @@ h1, h2{
     height: 25px;
 }
 
-.stacked-button {
-    height: 25px;
-    width: 12.5px;
-    font-size: xx-small;
-    padding:0;
-    margin:0;
-}
-
 .flipped {
     -webkit-transform: scaleX(-1);
     transform: scaleX(-1);

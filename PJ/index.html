@@ -9,26 +9,26 @@
   </head>
   <body>
     <div id="header" class="flex_row_centered">
-      <img class="flipped" src="../img/header.png" style="width: 50px; height: 50px;">
+      <img class="flipped l-icon" src="../img/header.png"/>
       <h1>IZAS - PJ</h1>
-      <img src="../img/header.png" style="width: 50px; height: 50px;">
+      <img class="l-icon" src="../img/header.png"/>
     </div>
     <div class="flex_row_sbetween" id="party-info">
-      <div class="flex_row_centered">
+      <div id="party-resources" class="flex_row_centered">
         <img src="../img/heal.png" class="s-icon" title="Party's heal"/>
-        <input type="number" id="heal-count" value="0" readonly>
+        <input id="heal-count" type="number" value="0" min="0" max="50" readonly>
         <img src="../img/confort.png" class="s-icon" title="Party's confort"/>
-        <input type="number" id="confort-count" value="0" readonly>
+        <input id="confort-count" type="number" value="0" min="0" max="50" readonly>
         <img src="../img/foods.png" class="s-icon" title="Party's foods"/>
-        <input type="number" id="foods-count" value="0" readonly>
+        <input id="foods-count" type="number" value="0" min="0" max="50" readonly>
       </div>
-      <div class="flex_row_centered">
+      <div id="player-info" class="flex_row_centered">
         <label>Nom:</label>
-        <input style="color:grey;" type="text" id="name" name="name" readonly />
+        <input type="text" id="name" name="name" readonly />
       </div>
-      <div class="flex_row_centered">
+      <div id="party-id" class="flex_row_centered">
         <label>Party ID:</label>
-        <input style="color:grey;" type="text" id="partyID" name="partyID" readonly />
+        <input type="text" id="partyID" name="partyID" readonly />
         <input type="button" id="copy-partyID" value="Copy"/>
       </div>
     </div>
