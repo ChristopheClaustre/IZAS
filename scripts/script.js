@@ -152,6 +152,9 @@ function initializePJ() {
     },
     { capture: true },
   );
+  
+  // Display player's name
+  document.getElementById("player-name").innerHTML = "<option>" + name + "</option>";
 
   // Synchronize position with firebase
   onValue(latitudeRef, (snapshot) => {
@@ -171,6 +174,18 @@ function initializePJ() {
   dbUtils.displayResources(partyID, "heal", (data) => document.getElementById("heal-count").value = data );
   dbUtils.displayResources(partyID, "confort", (data) => document.getElementById("confort-count").value = data );
   dbUtils.displayResources(partyID, "foods", (data) => document.getElementById("foods-count").value = data );
+  
+  // display resistance
+  dbUtils.displayResistance(partyID, name, (data) => {
+    document.getElementById("player-resistance").value = data.current;
+    document.getElementById("player-resistance-max").value = data.max;
+  });
+  
+  // display job
+  dbUtils.displayJob(partyID, name, (data) => {
+    document.getElementById("player-job").innerHTML = "<option>" + data.job + "</option>";
+    document.getElementById("player-job").title = data.job + " :\n" + data.description;
+  });
 }
 
 // Connect to firebase
@@ -215,9 +230,6 @@ else
   // Initialize for maps
   if (utils.isPlayerPage())
   {
-    // Display name
-    document.getElementById("name").value = name;
-    
     window.initializePJ = initializePJ;
   }
   else

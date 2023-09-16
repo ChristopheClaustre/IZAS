@@ -71,9 +71,26 @@ input[readonly] {
     -moz-appearance: textfield;
 }
 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0;
+input[type=number] {
+    border: solid 1px;
+    border-radius: 4px;
+    width: 3em;
+    text-align: center;
+}
+
+select[disabled] {
+    border: solid grey 1px;
+    border-radius: 4px;
+}
+
+select {
+    width: 5em;
+    text-align: center;
+}
+
+select[id="player-job"] {
+    width: 20em;
+    text-align: center;
 }
 
 #header {
@@ -85,14 +102,6 @@ input[type=number]::-webkit-outer-spin-button {
     height: 2%;
     width: 100%;
     margin: 0.5%;
-}
-
-#heal-count,
-#confort-count,
-#foods-count {
-    border: solid 1px;
-    width: 3em;
-    text-align: center;
 }
 
 #map,
