@@ -58,3 +58,4 @@ exclude:
   - Gemfile.lock
   - _site
   - unpublished
+  - launch_local.ps1
