@@ -103,7 +103,6 @@ export function displayResistance(partyID, playerID, changedCallback)
   onValue(ref(db, partiesKey + '/' + partyID + '/' + playersKey + '/' + playerID + '/' + resistanceKey ), (snapshot) => {
     if (! snapshot.exists()) utils.throwError("Party ID \"" + partyID + "\" or Player ID \"" + playerID + "\" does not exist.");
     const data = snapshot.val();
-    console.log(data);
     changedCallback(data);
   });
 }
@@ -114,8 +113,6 @@ export function displayJob(partyID, playerID, changedCallback)
   onValue(ref(db, partiesKey + '/' + partyID + '/' + playersKey + '/' + playerID + '/' + jobIDKey), (snapshot) => {
     if (! snapshot.exists()) utils.throwError("Party ID \"" + partyID + "\" or Player ID \"" + playerID + "\" does not exist.");
     const data = player.jobsList[snapshot.val()];
-    console.log(snapshot.val());
-    console.log(data);
     changedCallback(data);
   });
 }
