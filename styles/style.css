@@ -74,6 +74,16 @@ h1, h2{
     align-items: center;
 }
 
+input[readonly] {
+    color:grey;
+    -moz-appearance: textfield;
+}
+
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0;
+}
+
 #header {
     height: 10%;
     width: 100%;
@@ -89,7 +99,7 @@ h1, h2{
 #confort-count,
 #foods-count {
     border: solid 1px;
-    width: 2em;
+    width: 3em;
     text-align: center;
 }
 

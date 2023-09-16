@@ -83,6 +83,14 @@ export function incrResources(partyID, resource, add = +1)
   });
 }
 
+export function setResource(partyID, resource, newValue)
+{
+  var resourceRef = ref(db, partiesKey + '/' + partyID + '/' + resourcesKey + '/' + resource)
+  set(resourceRef, newValue).catch((error) => {
+    utils.throwError("Error when updating " + resource + " (" + error + ")");
+  });
+}
+
 export function randomName()
 {
   const id = utils.getRandomInt(namesList.length);

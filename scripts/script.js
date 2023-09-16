@@ -93,17 +93,14 @@ function initializeMJ() {
   });
   
   // display resources
-  dbUtils.displayResources(partyID, "heal", (data) => document.getElementById("heal-count").innerHTML = data );
-  dbUtils.displayResources(partyID, "confort", (data) => document.getElementById("confort-count").innerHTML = data );
-  dbUtils.displayResources(partyID, "foods", (data) => document.getElementById("foods-count").innerHTML = data );
+  dbUtils.displayResources(partyID, "heal", (data) => document.getElementById("heal-count").value = data );
+  dbUtils.displayResources(partyID, "confort", (data) => document.getElementById("confort-count").value = data );
+  dbUtils.displayResources(partyID, "foods", (data) => document.getElementById("foods-count").value = data );
   
   // +/- resources
-  utils.bindEvent(document.getElementById("heal++"), 'click', () => dbUtils.incrResources(partyID, 'heal') );
-  utils.bindEvent(document.getElementById("heal--"), 'click', () => dbUtils.incrResources(partyID, 'heal', -1) );
-  utils.bindEvent(document.getElementById("confort++"), 'click', () => dbUtils.incrResources(partyID, 'confort') );
-  utils.bindEvent(document.getElementById("confort--"), 'click', () => dbUtils.incrResources(partyID, 'confort', -1) );
-  utils.bindEvent(document.getElementById("foods++"), 'click', () => dbUtils.incrResources(partyID, 'foods') );
-  utils.bindEvent(document.getElementById("foods--"), 'click', () => dbUtils.incrResources(partyID, 'foods', -1) );
+  utils.bindEvent(document.getElementById("heal-count"), 'change', () => dbUtils.setResource(partyID, 'heal', parseInt(document.getElementById("heal-count").value)) );
+  utils.bindEvent(document.getElementById("confort-count"), 'change', () => dbUtils.setResource(partyID, 'confort', parseInt(document.getElementById("confort-count").value)) );
+  utils.bindEvent(document.getElementById("foods-count"), 'change', () => dbUtils.setResource(partyID, 'foods', parseInt(document.getElementById("foods-count").value)) );
 }
 
 function initializePJ() {
@@ -171,9 +168,9 @@ function initializePJ() {
   });
   
   // display resources
-  dbUtils.displayResources(partyID, "heal", (data) => document.getElementById("heal-count").innerHTML = data );
-  dbUtils.displayResources(partyID, "confort", (data) => document.getElementById("confort-count").innerHTML = data );
-  dbUtils.displayResources(partyID, "foods", (data) => document.getElementById("foods-count").innerHTML = data );
+  dbUtils.displayResources(partyID, "heal", (data) => document.getElementById("heal-count").value = data );
+  dbUtils.displayResources(partyID, "confort", (data) => document.getElementById("confort-count").value = data );
+  dbUtils.displayResources(partyID, "foods", (data) => document.getElementById("foods-count").value = data );
 }
 
 // Connect to firebase
