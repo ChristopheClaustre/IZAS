@@ -98,9 +98,83 @@ function initializeMJ() {
   dbUtils.displayResources(partyID, "foods", (data) => document.getElementById("foods-count").value = data );
   
   // +/- resources
-  utils.bindEvent(document.getElementById("heal-count"), 'change', () => dbUtils.setResource(partyID, 'heal', parseInt(document.getElementById("heal-count").value)) );
-  utils.bindEvent(document.getElementById("confort-count"), 'change', () => dbUtils.setResource(partyID, 'confort', parseInt(document.getElementById("confort-count").value)) );
-  utils.bindEvent(document.getElementById("foods-count"), 'change', () => dbUtils.setResource(partyID, 'foods', parseInt(document.getElementById("foods-count").value)) );
+  utils.bindEvent(document.getElementById("heal-count"), 'change', () => dbUtils.setResource(partyID, 'heal', parseInt(document.getElementById("heal-count").value)));
+  utils.bindEvent(document.getElementById("confort-count"), 'change', () => dbUtils.setResource(partyID, 'confort', parseInt(document.getElementById("confort-count").value)));
+  utils.bindEvent(document.getElementById("foods-count"), 'change', () => dbUtils.setResource(partyID, 'foods', parseInt(document.getElementById("foods-count").value)));
+  
+  // bind callback for player edition
+  var selectedPlayer = "";
+  var onPlayerChanged = () => {
+    selectedPlayer = document.getElementById("player-name").value;
+    if (selectedPlayer) {
+      dbUtils.getPlayer(partyID, selectedPlayer, (player) => {
+        document.getElementById("player-job").value = dbUtils.jobsList[player.jobID].job;
+        document.getElementById("player-resistance").value = player.resistance.current;
+        document.getElementById("player-resistance-max").value = player.resistance.max;
+      });
+    }
+    else {
+      document.getElementById("player-job").value = "";
+      document.getElementById("player-resistance").value = 4;
+      document.getElementById("player-resistance-max").value = 4;
+    }
+  };
+  utils.bindEvent(document.getElementById("player-job"), 'change', () => {
+    if (selectedPlayer) {
+      // set title (tooltip)
+      var elem = document.getElementById("player-job");
+      var jobID = dbUtils.jobsList.findIndex(job => job.job == elem.value);
+      var job = dbUtils.jobsList[jobID];
+      elem.title = job.job + " :\n" + job.description;
+      // update firebase
+      dbUtils.setPlayerAttribute(partyID, selectedPlayer, 'jobID', jobID);
+    }
+  });
+  utils.bindEvent(document.getElementById("player-resistance"), 'change', () => {
+    if (selectedPlayer) {
+      dbUtils.setPlayerAttribute(partyID, selectedPlayer, 'resistance/current', parseInt(document.getElementById("player-resistance").value));
+    }
+  });
+  utils.bindEvent(document.getElementById("player-resistance-max"), 'change', () => {
+    if (selectedPlayer) {
+      dbUtils.setPlayerAttribute(partyID, selectedPlayer, 'resistance/max', parseInt(document.getElementById("player-resistance-max").value));
+    }
+  });
+  utils.bindEvent(document.getElementById("player-name"), 'change', onPlayerChanged);
+  
+  // fill select for jobs
+  var optionsForJobs = "";
+  dbUtils.jobsList.forEach((job) => optionsForJobs += "<option>" + job.job + "</option>");
+  document.getElementById("player-job").innerHTML = optionsForJobs;
+  
+  // fill select for players
+  dbUtils.displayAllPlayersNames(partyID, (playersNames) => {
+    var options = "";
+    playersNames.forEach((playerName) => options += "<option>" + playerName + "</option>");
+    document.getElementById("player-name").innerHTML = options;
+    if (playersNames.length == 0)
+    {
+      selectedPlayer = "";
+      onPlayerChanged();
+    }
+    else if (!selectedPlayer || !playersNames.includes(selectedPlayer))
+    {
+      selectedPlayer = playersNames[0];
+      onPlayerChanged();
+    }
+    else
+    {
+      document.getElementById("player-name").value = selectedPlayer;
+    }
+  });
+  
+  // party resume
+  dbUtils.displayAllPlayers(partyID, (players) => {
+    var resume = "";
+    Object.keys(players).forEach(playerID => resume += playerID + " (" + players[playerID].resistance.current + "/" + players[playerID].resistance.max + ") : " + dbUtils.jobsList[players[playerID].jobID].job + "\n");
+    resume.trim();
+    document.getElementById("players-resume").title = resume;
+  });
 }
 
 function initializePJ() {

@@ -28,6 +28,9 @@ export function connectToDB()
 // Default values
 export const defaultPegman = dbDefault.pegman;
 
+// Jobs
+export const jobsList = player.jobsList;
+
 // Keys
 const partiesKey = "parties";
 const resourcesKey = "resources";
@@ -121,4 +124,44 @@ export function randomName()
 {
   const id = utils.getRandomInt(player.namesList.length);
   return player.namesList[id];
+}
+
+// @return list of all players names
+export function displayAllPlayersNames(partyID, changedCallback)
+{
+  onValue(ref(db, partiesKey + '/' + partyID + '/' + playersKey, { shallow:true }), (snapshot) => {
+    if (! snapshot.exists()) { changedCallback([]); return; }
+    var players = [];
+    snapshot.forEach(child => { players.push(child.key) });
+    changedCallback(players);
+  });
+}
+
+// @return list of all players names
+export function displayAllPlayers(partyID, changedCallback)
+{
+  onValue(ref(db, partiesKey + '/' + partyID + '/' + playersKey), (snapshot) => {
+    if (! snapshot.exists()) { changedCallback({}); return; }
+    changedCallback(snapshot.val());
+  });
+}
+
+export function getPlayer(partyID, playerID, getCallback)
+{
+  var playerRef = ref(db, partiesKey + '/' + partyID + '/' + playersKey + '/' + playerID);
+  get(playerRef).then((snapshot) => {
+    if (! snapshot.exists()) utils.throwError("Party ID \"" + partyID + "\" or Player ID \"" + playerID + "\" does not exist.");
+    const data = snapshot.val();
+    getCallback(data);
+  }).catch((error) => {
+    utils.throwError("Error when retrieving player \"" + playerID + "\" from party \"" + partyID + "\" (" + error + ")");
+  });
+}
+
+export function setPlayerAttribute(partyID, playerID, attributeName, newValue)
+{
+  var playerAttrRef = ref(db, partiesKey + '/' + partyID + '/' + playersKey + '/' + playerID + '/' + attributeName);
+  set(playerAttrRef, newValue).catch((error) => {
+    utils.throwError("Error when updating " + attributeName + " for player \"" + playerID + "\" (" + error + ")");
+  });
 }
