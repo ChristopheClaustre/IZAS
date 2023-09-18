@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js';
-import { getDatabase, ref, push, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+import { getDatabase, ref, push, set, get, onValue, child } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
 import * as utils from "./utils.js";
 import { data as player } from "./player.js";
 import { data as dbDefault } from "./dbDefault.js";
@@ -15,153 +15,234 @@ const firebaseConfig = {
   appId: "1:119715811198:web:a187efcf590e6f62f8ed2f"
 };
 
-// Initialize Firebase
-export var app;
-export var db;
-
-export function connectToDB()
-{
-  app = initializeApp(firebaseConfig);
-  db = getDatabase();
-}
-
-// Default values
-export const defaultPegman = dbDefault.pegman;
-
-// Jobs
-export const jobsList = player.jobsList;
-
 // Keys
 const partiesKey = "parties";
 const resourcesKey = "resources";
+const pegmanKey = "pegman";
 const playersKey = "players";
 const resistanceKey = "resistance";
 const jobIDKey = "jobID";
 
-// function utils
-export function getPartiesRef(partyID)
-{
-  return ref(db, partiesKey + '/' + partyID);
-}
-
-export function createParty(createdCallback)
-{
-  push(ref(db, partiesKey + '/'), {pegman: defaultPegman, resources: dbDefault.resources}).then((snapshot) => {
-    createdCallback(snapshot.key);
-  }).catch((error) => {
-    utils.throwError("Error when creating new party (" + error + ")");
-  });
-}
-
-export function createPlayer(partyID, playerID, createdCallback)
-{
-  var playerData = dbDefault.player;
-  var resistance = 1 + utils.getRandomInt(3);
-  playerData.resistance.current = resistance;
-  playerData.resistance.max = resistance;
-  playerData.jobID = utils.getRandomInt(player.jobsList.length);
+export class Firebase {
   
-  set(ref(db, partiesKey + '/' + partyID + '/' + playersKey + '/' + playerID), playerData).then((snapshot) => {
-    createdCallback();
-  }).catch((error) => {
-    utils.throwError("Error when creating new player (" + error + ")");
-  });
-}
-
-export function displayResources(partyID, resource, changedCallback)
-{
-  onValue(ref(db, partiesKey + '/' + partyID + '/' + resourcesKey + '/' + resource), (snapshot) => {
-    if (! snapshot.exists()) utils.throwError("Party ID \"" + partyID + "\" does not exist.");
-    const data = snapshot.val();
-    changedCallback(data);
-  });
-}
-
-export function incrResources(partyID, resource, add = +1)
-{
-  var resourceRef = ref(db, partiesKey + '/' + partyID + '/' + resourcesKey + '/' + resource)
+  /* Private Attributes */
+  #app;
+  #db;
+  #partyRef;
+  #partyIntegrityUnsubscriber;
+  #connectingToParty = false;
+  #playerRef;
+  #playerIntegrityUnsubscriber;
+  #connectingToPlayer = false;
   
-  get(resourceRef).then((snapshot) => {
-    if (! snapshot.exists()) utils.throwError("Error when updating " + resource + " (" + error + ")");
-    const data = snapshot.val();
-    set(resourceRef, data+add).catch((error) => {
-      utils.throwError("Error when updating " + resource + " (" + error + ")");
+  constructor() {
+    this.app = initializeApp(firebaseConfig);
+    this.db = getDatabase();
+  }
+  
+  /* Data Creation */
+  createParty(createdCallback)
+  {
+    push(ref(this.db, partiesKey + '/'), {pegman: dbDefault.pegman, resources: dbDefault.resources}).then((snapshot) => {
+      createdCallback(snapshot.key);
+    }).catch((error) => {
+      utils.throwError("Error when creating new party (" + error + ")");
     });
-  }).catch((error) => {
-    utils.throwError("Error when updating " + resource + " (" + error + ")");
-  });
-}
+  }
+  createPlayer(_partyID, _playerID, createdCallback)
+  {
+    var playerData = dbDefault.player;
+    var resistance = 1 + utils.getRandomInt(3);
+    playerData.resistance.current = resistance;
+    playerData.resistance.max = resistance;
+    playerData.jobID = utils.getRandomInt(player.jobsList.length);
+    
+    set(ref(this.db, partiesKey + '/' + _partyID + '/' + playersKey + '/' + _playerID), playerData).then((snapshot) => {
+      createdCallback();
+    }).catch((error) => {
+      utils.throwError("Error when creating new player (" + error + ")");
+    });
+  }
+  
+  /* Party management */
+  deconnectFromParty() {
+    if (this.partyIntegrityUnsubscriber) this.partyIntegrityUnsubscriber(); // unsubscribe binded onValue (@see connectToParty)
+    this.partyRef = undefined;
+    this.connectingToParty = false;
+  }
+  isConnectedToParty() { return !!this.partyRef; } // is partyRef valid ?
+  connectToParty(_partyID) {
+    this.deconnectFromParty();
+    this.connectingToParty = true;
+    
+    this.partyIntegrityUnsubscriber = onValue(
+      ref(this.db, partiesKey),
+      (snapshot) => {
+        this.partyRef = undefined;
+        if (! snapshot.exists()) { utils.throwError("Party '" + _partyID + "' doesn't exist anymore."); return; }
+        var found = false;
+        snapshot.forEach(child => found = found || child.key == _partyID);
+        if (found) {
+          this.partyRef = ref(this.db, partiesKey + '/' + _partyID);
+          this.connectingToParty = false;
+        }
+        else {
+          utils.throwError("Party '" + _partyID + "' doesn't exist anymore.");
+        }
+      },
+      { shallow:true } // Get only children keys
+    );
+  }
+  
+  /* Player management */
+  deconnectFromPlayer() {
+    if (this.playerIntegrityUnsubscriber) this.playerIntegrityUnsubscriber(); // unsubscribe binded onValue (@see connectToPlayer)
+    this.playerRef = undefined;
+    this.connectingToPlayer = false;
+  }
+  isConnectedToPlayer() { return !!this.playerRef; } // is playerRef valid ?
+  async connectToPlayer(_playerID) {
+    this.deconnectFromPlayer();
+    this.connectingToPlayer = true;
+    
+    while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+    if (! this.isConnectedToParty()) return false;
+    
+    this.playerIntegrityUnsubscriber = onValue(
+      child(this.partyRef, playersKey),
+      (snapshot) => {
+        if (! snapshot.exists()) { utils.throwError("Player '" + _playerID + "' doesn't exist anymore."); return; }
+        var found = false;
+        snapshot.forEach(child => found = found || child.key == _playerID);
+        if (found) {
+          this.playerRef = child(this.partyRef, playersKey + "/" + _playerID);
+          this.connectingToPlayer = false;
+        }
+        else
+          utils.throwError("Player '" + _playerID + "' doesn't exist anymore.");
+      },
+      { shallow:true } // Get only children keys
+    );
+    
+    return true;
+  }
+  
+  /* Bound - party */
+  // @return int
+  async bindToResource(resourceName, changedCallback)
+  {
+    while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+    if (! this.isConnectedToParty()) return undefined;
+    
+    return onValue(child(this.partyRef, resourcesKey + '/' + resourceName), (snapshot) => {
+      if (! snapshot.exists()) console.log("Error while retrieving resource '" + resourceName + "'.");
+      const data = snapshot.val();
+      changedCallback(data);
+    });
+  }
+  // @return { lat:number, lng:number }
+  async bindToPegman(changedCallback)
+  {
+    while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+    if (! this.isConnectedToParty()) return undefined;
+    
+    onValue(child(this.partyRef, pegmanKey), (snapshot) => {
+      if (! snapshot.exists()) { console.log("Error while retrieving pegman from party '" + this.partyRef.key + "'."); return; }
+      const data = snapshot.val();
+      changedCallback(data);
+    });
+  }
+  // @return list of all players names
+  async bindToPlayerNames(changedCallback)
+  {
+    while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+    if (! this.isConnectedToParty()) return undefined;
+    
+    onValue(child(this.partyRef, playersKey), (snapshot) => {
+        if (! snapshot.exists()) { changedCallback([]); return; }
+        var players = [];
+        snapshot.forEach(child => { players.push(child.key) });
+        changedCallback(players);
+      },
+      { shallow:true }
+    );
+  }
+  // @return list of all players
+  async bindToPlayers(changedCallback)
+  {
+    while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+    if (! this.isConnectedToParty()) return undefined;
+    
+    onValue(child(this.partyRef, playersKey), (snapshot) => {
+      if (! snapshot.exists()) { changedCallback({}); return; }
+      changedCallback(snapshot.val());
+    });
+  }
+  
+  /* Bound - player */
+  // @return { current:int, max:int }
+  async bindToResistance(changedCallback)
+  {
+    while (this.connectingToPlayer) { await new Promise(resolve => setTimeout(resolve, 500)); }
+    if (! this.isConnectedToPlayer()) return undefined;
 
-export function setResource(partyID, resource, newValue)
-{
-  var resourceRef = ref(db, partiesKey + '/' + partyID + '/' + resourcesKey + '/' + resource)
-  set(resourceRef, newValue).catch((error) => {
-    utils.throwError("Error when updating " + resource + " (" + error + ")");
-  });
-}
+    return onValue(child(this.playerRef, resistanceKey), (snapshot) => {
+      if (! snapshot.exists()) { console.log("Error while retrieving resistance from player '" + this.playerRef.key + "'."); return; }
+      const data = snapshot.val();
+      changedCallback(data);
+    });
+  }
+  // @return { job:string, description:string }
+  async bindToJob(changedCallback)
+  {
+    while (this.connectingToPlayer) { await new Promise(resolve => setTimeout(resolve, 500)); }
+    if (! this.isConnectedToPlayer()) return undefined;
 
-// @return { current, max }
-export function displayResistance(partyID, playerID, changedCallback)
-{
-  onValue(ref(db, partiesKey + '/' + partyID + '/' + playersKey + '/' + playerID + '/' + resistanceKey ), (snapshot) => {
-    if (! snapshot.exists()) utils.throwError("Party ID \"" + partyID + "\" or Player ID \"" + playerID + "\" does not exist.");
-    const data = snapshot.val();
-    changedCallback(data);
-  });
-}
+    return onValue(child(this.playerRef, jobIDKey), (snapshot) => {
+      if (! snapshot.exists()) { console.log("Error while retrieving jobID from player '" + this.playerRef.key + "'."); return; }
+      const data = player.jobsList[snapshot.val()];
+      changedCallback(data);
+    });
+  }
 
-// @return { job, description }
-export function displayJob(partyID, playerID, changedCallback)
-{
-  onValue(ref(db, partiesKey + '/' + partyID + '/' + playersKey + '/' + playerID + '/' + jobIDKey), (snapshot) => {
-    if (! snapshot.exists()) utils.throwError("Party ID \"" + partyID + "\" or Player ID \"" + playerID + "\" does not exist.");
-    const data = player.jobsList[snapshot.val()];
-    changedCallback(data);
-  });
+  /* Getter - party */
+  getPlayer(playerID, getCallback)
+  {
+    get(child(this.partyRef, playersKey + '/' + playerID)).then((snapshot) => {
+      if (! snapshot.exists()) { console.log("Error when retrieving player \"" + playerID + "\"."); return; }
+      const data = snapshot.val();
+      getCallback(data);
+    }).catch((error) => {
+      utils.throwError("Error when retrieving player '" + playerID + "' from party '" + partyID + "' (" + error + ")");
+    });
+  }
+  
+  /* Setter - party */
+  setResource(resourceName, newValue)
+  {
+    if (! this.isConnectedToParty()) return;
+    set(child(this.partyRef, resourcesKey + '/' + resourceName), newValue).catch((error) => {
+      utils.throwError("Error when updating " + resourceName + " (" + error + ")");
+    });
+  }
+  setPegman(newValue)
+  {
+    if (! this.isConnectedToParty()) return;
+    set(child(this.partyRef, pegmanKey), newValue).catch((error) => {
+      utils.throwError("Error when updating pegman (" + error + ")");
+    });
+  }
+  setPlayerAttribute(playerID, attributeName, newValue)
+  {
+    if (! this.isConnectedToParty()) return;
+    set(child(this.partyRef, playersKey + '/' + playerID + '/' + attributeName), newValue).catch((error) => {
+      utils.throwError("Error when updating " + attributeName + " for player \"" + playerID + "\" (" + error + ")");
+    });
+  }
 }
 
 export function randomName()
 {
   const id = utils.getRandomInt(player.namesList.length);
   return player.namesList[id];
-}
-
-// @return list of all players names
-export function displayAllPlayersNames(partyID, changedCallback)
-{
-  onValue(ref(db, partiesKey + '/' + partyID + '/' + playersKey, { shallow:true }), (snapshot) => {
-    if (! snapshot.exists()) { changedCallback([]); return; }
-    var players = [];
-    snapshot.forEach(child => { players.push(child.key) });
-    changedCallback(players);
-  });
-}
-
-// @return list of all players names
-export function displayAllPlayers(partyID, changedCallback)
-{
-  onValue(ref(db, partiesKey + '/' + partyID + '/' + playersKey), (snapshot) => {
-    if (! snapshot.exists()) { changedCallback({}); return; }
-    changedCallback(snapshot.val());
-  });
-}
-
-export function getPlayer(partyID, playerID, getCallback)
-{
-  var playerRef = ref(db, partiesKey + '/' + partyID + '/' + playersKey + '/' + playerID);
-  get(playerRef).then((snapshot) => {
-    if (! snapshot.exists()) utils.throwError("Party ID \"" + partyID + "\" or Player ID \"" + playerID + "\" does not exist.");
-    const data = snapshot.val();
-    getCallback(data);
-  }).catch((error) => {
-    utils.throwError("Error when retrieving player \"" + playerID + "\" from party \"" + partyID + "\" (" + error + ")");
-  });
-}
-
-export function setPlayerAttribute(partyID, playerID, attributeName, newValue)
-{
-  var playerAttrRef = ref(db, partiesKey + '/' + partyID + '/' + playersKey + '/' + playerID + '/' + attributeName);
-  set(playerAttrRef, newValue).catch((error) => {
-    utils.throwError("Error when updating " + attributeName + " for player \"" + playerID + "\" (" + error + ")");
-  });
-}
+};

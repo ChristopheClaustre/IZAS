@@ -1,22 +1,23 @@
 import * as dbUtils from "./dbUtils.js";
 import * as utils from "./utils.js";
 import { ref, onValue, get, set, child } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+import { data as playerData } from "./player.js";
+import { data as dbDefault } from "./dbDefault.js";
 
 // Initialize MJ and PJ functions
 function initializeMJ() {
-  const partiesRef = dbUtils.getPartiesRef(partyID);
-  const latitudeRef = child(partiesRef, 'pegman/lat');
-  const longitudeRef = child(partiesRef, 'pegman/lng');
+  // Connect to party
+  firebase.connectToParty(partyID);
   
   // Create maps objects
-  map = new google.maps.Map(document.getElementById("map"), {
+  var map = new google.maps.Map(document.getElementById("map"), {
     center: pegman,
     zoom: 14,
     fullscreenControl: false,
     motionTracking: false,
     motionTrackingControl: false
   });
-  panorama = new google.maps.StreetViewPanorama(
+  var panorama = new google.maps.StreetViewPanorama(
     document.getElementById("pano"),
     {
       position: pegman,
@@ -54,31 +55,12 @@ function initializeMJ() {
   map.controls[google.maps.ControlPosition.TOP_RIGHT].push(recenterInput);
   utils.bindEvent(recenterInput, "click", () => map.setCenter(panorama.position));
   
-  // Initialize position with firebase values
+  // Synchronize position with firebase
   var pos_initialized = 0;
-  get(latitudeRef).then((snapshot) => {
-    if (snapshot.exists()) {
-      pegman.lat = snapshot.val();
-      panorama.setPosition(pegman);
-      map.setCenter(pegman);
-      pos_initialized++;
-    } else {
-      utils.throwError("Party ID \"" + partyID + "\" does not exists.");
-    }
-  }).catch((error) => {
-    console.error(error);
-  });
-  get(longitudeRef).then((snapshot) => {
-    if (snapshot.exists()) {
-      pegman.lng = snapshot.val();
-      panorama.setPosition(pegman);
-      map.setCenter(pegman);
-      pos_initialized++;
-    } else {
-      utils.throwError("Party ID \"" + partyID + "\" does not exists.");
-    }
-  }).catch((error) => {
-    console.error(error);
+  firebase.bindToPegman((pegman) => {
+    panorama.setPosition(pegman);
+    map.setCenter(pegman);
+    pos_initialized++;
   });
   
   // Update firebase when position is changed
@@ -87,28 +69,27 @@ function initializeMJ() {
       var position = panorama.getPosition();
       pegman.lat = position.lat();
       pegman.lng = position.lng();
-      set(latitudeRef, pegman.lat);
-      set(longitudeRef, pegman.lng);
+      setPegman(pegman);
     }
   });
   
   // display resources
-  dbUtils.displayResources(partyID, "heal", (data) => document.getElementById("heal-count").value = data );
-  dbUtils.displayResources(partyID, "confort", (data) => document.getElementById("confort-count").value = data );
-  dbUtils.displayResources(partyID, "foods", (data) => document.getElementById("foods-count").value = data );
+  firebase.bindToResource("heal", (data) => document.getElementById("heal-count").value = data );
+  firebase.bindToResource("confort", (data) => document.getElementById("confort-count").value = data );
+  firebase.bindToResource("foods", (data) => document.getElementById("foods-count").value = data );
   
   // +/- resources
-  utils.bindEvent(document.getElementById("heal-count"), 'change', () => dbUtils.setResource(partyID, 'heal', parseInt(document.getElementById("heal-count").value)));
-  utils.bindEvent(document.getElementById("confort-count"), 'change', () => dbUtils.setResource(partyID, 'confort', parseInt(document.getElementById("confort-count").value)));
-  utils.bindEvent(document.getElementById("foods-count"), 'change', () => dbUtils.setResource(partyID, 'foods', parseInt(document.getElementById("foods-count").value)));
+  utils.bindEvent(document.getElementById("heal-count"), 'change', () => firebase.setResource('heal', parseInt(document.getElementById("heal-count").value)));
+  utils.bindEvent(document.getElementById("confort-count"), 'change', () => firebase.setResource('confort', parseInt(document.getElementById("confort-count").value)));
+  utils.bindEvent(document.getElementById("foods-count"), 'change', () => firebase.setResource('foods', parseInt(document.getElementById("foods-count").value)));
   
   // bind callback for player edition
   var selectedPlayer = "";
   var onPlayerChanged = () => {
     selectedPlayer = document.getElementById("player-name").value;
     if (selectedPlayer) {
-      dbUtils.getPlayer(partyID, selectedPlayer, (player) => {
-        document.getElementById("player-job").value = dbUtils.jobsList[player.jobID].job;
+      firebase.getPlayer(selectedPlayer, (player) => {
+        document.getElementById("player-job").value = playerData.jobsList[player.jobID].job;
         document.getElementById("player-resistance").value = player.resistance.current;
         document.getElementById("player-resistance-max").value = player.resistance.max;
       });
@@ -123,32 +104,32 @@ function initializeMJ() {
     if (selectedPlayer) {
       // set title (tooltip)
       var elem = document.getElementById("player-job");
-      var jobID = dbUtils.jobsList.findIndex(job => job.job == elem.value);
-      var job = dbUtils.jobsList[jobID];
+      var jobID = playerData.jobsList.findIndex(job => job.job == elem.value);
+      var job = playerData.jobsList[jobID];
       elem.title = job.job + " :\n" + job.description;
       // update firebase
-      dbUtils.setPlayerAttribute(partyID, selectedPlayer, 'jobID', jobID);
+      firebase.setPlayerAttribute(selectedPlayer, 'jobID', jobID);
     }
   });
   utils.bindEvent(document.getElementById("player-resistance"), 'change', () => {
     if (selectedPlayer) {
-      dbUtils.setPlayerAttribute(partyID, selectedPlayer, 'resistance/current', parseInt(document.getElementById("player-resistance").value));
+      firebase.setPlayerAttribute(selectedPlayer, 'resistance/current', parseInt(document.getElementById("player-resistance").value));
     }
   });
   utils.bindEvent(document.getElementById("player-resistance-max"), 'change', () => {
     if (selectedPlayer) {
-      dbUtils.setPlayerAttribute(partyID, selectedPlayer, 'resistance/max', parseInt(document.getElementById("player-resistance-max").value));
+      firebase.setPlayerAttribute(selectedPlayer, 'resistance/max', parseInt(document.getElementById("player-resistance-max").value));
     }
   });
   utils.bindEvent(document.getElementById("player-name"), 'change', onPlayerChanged);
   
   // fill select for jobs
   var optionsForJobs = "";
-  dbUtils.jobsList.forEach((job) => optionsForJobs += "<option>" + job.job + "</option>");
+  playerData.jobsList.forEach((job) => optionsForJobs += "<option>" + job.job + "</option>");
   document.getElementById("player-job").innerHTML = optionsForJobs;
   
   // fill select for players
-  dbUtils.displayAllPlayersNames(partyID, (playersNames) => {
+  firebase.bindToPlayerNames((playersNames) => {
     var options = "";
     playersNames.forEach((playerName) => options += "<option>" + playerName + "</option>");
     document.getElementById("player-name").innerHTML = options;
@@ -169,21 +150,22 @@ function initializeMJ() {
   });
   
   // party resume
-  dbUtils.displayAllPlayers(partyID, (players) => {
+  firebase.bindToPlayers((players) => {
     var resume = "";
-    Object.keys(players).forEach(playerID => resume += playerID + " (" + players[playerID].resistance.current + "/" + players[playerID].resistance.max + ") : " + dbUtils.jobsList[players[playerID].jobID].job + "\n");
+    Object.keys(players).forEach(playerID => resume += playerID + " (" + players[playerID].resistance.current + "/" + players[playerID].resistance.max + ") : " + playerData.jobsList[players[playerID].jobID].job + "\n");
     resume.trim();
     document.getElementById("players-resume").title = resume;
   });
 }
 
 function initializePJ() {
-  const partiesRef = dbUtils.getPartiesRef(partyID);
-  const latitudeRef = child(partiesRef, 'pegman/lat');
-  const longitudeRef = child(partiesRef, 'pegman/lng');
+  // Connect to party
+  firebase.connectToParty(partyID);
+  // Connect as player
+  firebase.connectToPlayer(playerID);
   
   // Create maps objects
-  panorama = new google.maps.StreetViewPanorama(
+  var panorama = new google.maps.StreetViewPanorama(
     document.getElementById("pano-pj"),
     {
       position: pegman,
@@ -228,52 +210,39 @@ function initializePJ() {
   );
   
   // Display player's name
-  document.getElementById("player-name").innerHTML = "<option>" + name + "</option>";
+  document.getElementById("player-name").innerHTML = "<option>" + playerID + "</option>";
 
   // Synchronize position with firebase
-  onValue(latitudeRef, (snapshot) => {
-    if (! snapshot.exists()) utils.throwError("Party ID \"" + partyID + "\" does not exists.");
-    const data = snapshot.val();
-    pegman.lat = data;
-    panorama.setPosition(pegman);
-  });
-  onValue(longitudeRef, (snapshot) => {
-    if (! snapshot.exists()) utils.throwError("Party ID \"" + partyID + "\" does not exists.");
-    const data = snapshot.val();
-    pegman.lng = data;
-    panorama.setPosition(pegman);
-  });
+  firebase.bindToPegman((pegman) => panorama.setPosition(pegman));
   
   // display resources
-  dbUtils.displayResources(partyID, "heal", (data) => document.getElementById("heal-count").value = data );
-  dbUtils.displayResources(partyID, "confort", (data) => document.getElementById("confort-count").value = data );
-  dbUtils.displayResources(partyID, "foods", (data) => document.getElementById("foods-count").value = data );
+  firebase.bindToResource("heal", (data) => document.getElementById("heal-count").value = data );
+  firebase.bindToResource("confort", (data) => document.getElementById("confort-count").value = data );
+  firebase.bindToResource("foods", (data) => document.getElementById("foods-count").value = data );
   
   // display resistance
-  dbUtils.displayResistance(partyID, name, (data) => {
+  firebase.bindToResistance((data) => {
     document.getElementById("player-resistance").value = data.current;
     document.getElementById("player-resistance-max").value = data.max;
   });
   
   // display job
-  dbUtils.displayJob(partyID, name, (data) => {
+  firebase.bindToJob((data) => {
     document.getElementById("player-job").innerHTML = "<option>" + data.job + "</option>";
     document.getElementById("player-job").title = data.job + " :\n" + data.description;
   });
 }
 
 // Connect to firebase
-dbUtils.connectToDB();
+var firebase = new dbUtils.Firebase();
 
 // Initialize maps values
-var panorama = null;
-var map = null;
 var pegman = dbUtils.defaultPegman;
 
 // Manage query string (and retrieve party ID if possible)
 const urlParams = new URLSearchParams(window.location.search);
 var partyID = urlParams.get("partyID", "");
-var name = urlParams.get("name", "");
+var playerID = urlParams.get("playerID", "");
 
 // Check partyID
 if ( ! partyID )
@@ -284,16 +253,17 @@ if ( ! partyID )
   }
   else
   {
-    dbUtils.createParty((newPartyID) => utils.gotoUrl(utils.constructMasterUrl(newPartyID)));
+    firebase.createParty((newPartyID) => utils.gotoUrl(utils.constructMasterUrl(newPartyID)));
   }
 }
 // Check player's name
-else if (utils.isPlayerPage() && ! name)
+else if (utils.isPlayerPage() && ! playerID)
 {
-  while(!name) {
-    name = window.prompt("Entrez le nom de votre personage :", "");
+  while(!playerID) {
+    playerID = window.prompt("Entrez le nom de votre personage :", dbUtils.randomName());
   }
-  dbUtils.createPlayer(partyID, name, (newPlayerID) => utils.gotoUrl(utils.constructPlayerUrl(partyID, name)));
+  console.log("Selected playerID: " + playerID)
+  firebase.createPlayer(partyID, playerID, (newPlayerID) => utils.gotoUrl(utils.constructPlayerUrl(partyID, playerID)));
 }
 else
 {
