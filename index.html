@@ -14,15 +14,15 @@
     </div>
     <div class="flex_column_centered">
       <h2>- JOUEUR -</h2>
-      <form class="flex_column_centered" action="/PJ/" onsubmit="">
+      <form class="flex_column_centered" action="PJ/" onsubmit="">
         <div class="flex_row_centered">
           <label>Party ID (demande à ton MJ) :</label>
           <input type="text" id="partyID" name="partyID" required />
         </div>
         <div class="flex_row_centered">
           <label>Pseudo :</label>
-          <input type="text" id="name" name="name" required />
-          <input type="button" id="random-name" value="Random"/>
+          <input type="text" id="playerID" name="playerID" required />
+          <input type="button" id="random-playerID" value="Random"/>
         </div>
         <input type="submit" value="Play !"/>
       </form>
@@ -33,8 +33,7 @@
     <script type="module">
       import { randomName } from "./scripts/dbUtils.js";
       import { bindEvent } from "./scripts/utils.js";
-      bindEvent(document.getElementById("random-name"), 'click', () => document.getElementById("name").value = randomName());
+      bindEvent(document.getElementById("random-playerID"), 'click', () => document.getElementById("playerID").value = randomName());
     </script>
   </body>
 </html>
-

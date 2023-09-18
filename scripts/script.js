@@ -269,7 +269,7 @@ else
 {
   // Display partyID
   document.getElementById("partyID").value = partyID;
-  utils.bindEvent(document.getElementById("copy-partyID"), 'click', () => navigator.clipboard.writeText(utils.constructUrl(true, partyID)));
+  utils.bindEvent(document.getElementById("copy-partyID"), 'click', () => navigator.clipboard.writeText(partyID));
 
   // Initialize for maps
   if (utils.isPlayerPage())
