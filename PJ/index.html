@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="utf-8">
-    <title>IZAS - PJ</title>
+    <title>IZAS - Joueur</title>
     <link rel="icon" href="../img/favicon.png">
     <link rel="stylesheet" href="../styles/style.css">
     <script type="module" src="../scripts/script.js"></script>
@@ -10,19 +10,20 @@
   <body>
     <div id="header" class="flex_row_centered">
       <img class="flipped l-icon" src="../img/header.png"/>
-      <h1>IZAS - PJ</h1>
+      <h1>IZAS - Joueur</h1>
       <img class="l-icon" src="../img/header.png"/>
     </div>
     <div id="party-info" class="flex_row_sbetween">
       <div id="party-resources" class="flex_row_centered">
-        <img src="../img/heal.png" class="s-icon" title="Party's heal"/>
-        <input id="heal-count" type="number" value="0" min="0" max="50" readonly>
-        <img src="../img/confort.png" class="s-icon" title="Party's confort"/>
-        <input id="confort-count" type="number" value="0" min="0" max="50" readonly>
-        <img src="../img/foods.png" class="s-icon" title="Party's foods"/>
-        <input id="foods-count" type="number" value="0" min="0" max="50" readonly>
+        <img src="../img/heal.png" class="s-icon" title="Packs de soin de l'équipe"/>
+        <input id="heal-count" type="number" title="Packs de soin de l'équipe" value="0" min="0" max="50" readonly>
+        <img src="../img/confort.png" class="s-icon" title="Packs de confort de l'équipe"/>
+        <input id="confort-count" type="number" title="Packs de confort de l'équipe" value="0" min="0" max="50" readonly>
+        <img src="../img/foods.png" class="s-icon" title="Packs de nourriture de l'équipe"/>
+        <input id="foods-count" type="number"  title="Packs de nourriture de l'équipe" value="0" min="0" max="50" readonly>
       </div>
       <div id="player-info" class="flex_row_centered">
+        <p>Vous :</p>
         <select id="player-name" disabled ></select>
         <select id="player-job" disabled ></select>
         <img class="flipped s-icon" title="IZAS resistance" src="../img/header.png"/>
@@ -30,9 +31,9 @@
         <input type="number" id="player-resistance-max" value="4" min="1" max="4" readonly />
       </div>
       <div id="party-id" class="flex_row_centered">
-        <label>Party ID:</label>
+        <label>Index d'équipe :</label>
         <input type="text" id="partyID" name="partyID" readonly />
-        <input type="button" id="copy-partyID" value="Copy"/>
+        <input type="button" id="copy-partyID" value="Copier"/>
       </div>
     </div>
     <div id="pano-pj"></div>

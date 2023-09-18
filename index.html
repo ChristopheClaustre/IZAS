@@ -16,18 +16,18 @@
       <h2>- JOUEUR -</h2>
       <form class="flex_column_centered" action="PJ/" onsubmit="">
         <div class="flex_row_centered">
-          <label>Party ID (demande à ton MJ) :</label>
+          <label>Index d'équipe (demande à ton MJ) :</label>
           <input type="text" id="partyID" name="partyID" required />
         </div>
         <div class="flex_row_centered">
-          <label>Pseudo :</label>
+          <label>Nom du personnage :</label>
           <input type="text" id="playerID" name="playerID" required />
-          <input type="button" id="random-playerID" value="Random"/>
+          <input type="button" id="random-playerID" value="Hasard !"/>
         </div>
-        <input type="submit" value="Play !"/>
+        <input type="submit" value="Jouer !"/>
       </form>
       <h2>- MAITRE DU JEU -</h2>
-      <a href="MJ/">Créer une partie</a>
+      <form action="MJ/"><input type="submit" value="Créer une partie"/></form>
     </div>
     
     <script type="module">
