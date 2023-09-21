@@ -31,7 +31,7 @@
     </div>
     
     <script type="module">
-      import { randomName } from "./scripts/dbUtils.js";
+      import { randomName } from "./scripts/player.js";
       import { bindEvent } from "./scripts/utils.js";
       bindEvent(document.getElementById("random-playerID"), 'click', () => document.getElementById("playerID").value = randomName());
     </script>

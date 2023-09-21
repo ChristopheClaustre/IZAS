@@ -2,7 +2,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.3.1/firebas
 import { getDatabase, ref, push, set, get, onValue, child } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
 import * as utils from "./utils.js";
 import { data as player } from "./player.js";
-import { data as dbDefault } from "./dbDefault.js";
+import { data as defaultData } from "./default.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -43,7 +43,7 @@ export class Firebase {
   /* Data Creation */
   createParty(createdCallback)
   {
-    push(ref(this.db, partiesKey + '/'), {pegman: dbDefault.pegman, resources: dbDefault.resources}).then((snapshot) => {
+    push(ref(this.db, partiesKey + '/'), {pegman: defaultData.pegman, resources: defaultData.resources}).then((snapshot) => {
       createdCallback(snapshot.key);
     }).catch((error) => {
       utils.throwError("Error when creating new party (" + error + ")");
@@ -51,7 +51,7 @@ export class Firebase {
   }
   createPlayer(_partyID, _playerID, createdCallback)
   {
-    var playerData = dbDefault.player;
+    var playerData = defaultData.player;
     var resistance = 1 + utils.getRandomInt(3);
     playerData.resistance.current = resistance;
     playerData.resistance.max = resistance;
@@ -240,9 +240,3 @@ export class Firebase {
     });
   }
 }
-
-export function randomName()
-{
-  const id = utils.getRandomInt(player.namesList.length);
-  return player.namesList[id];
-};

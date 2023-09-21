@@ -1,8 +1,8 @@
 import * as dbUtils from "./dbUtils.js";
 import * as utils from "./utils.js";
 import { ref, onValue, get, set, child } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
-import { data as playerData } from "./player.js";
-import { data as dbDefault } from "./dbDefault.js";
+import { data as playerData, randomName } from "./player.js";
+import { data as defaultData } from "./default.js";
 
 // Initialize MJ and PJ functions
 function initializeMJ() {
@@ -237,7 +237,7 @@ function initializePJ() {
 var firebase = new dbUtils.Firebase();
 
 // Initialize maps values
-var pegman = dbUtils.defaultPegman;
+var pegman = defaultData.pegman;
 
 // Manage query string (and retrieve party ID if possible)
 const urlParams = new URLSearchParams(window.location.search);
@@ -260,7 +260,7 @@ if ( ! partyID )
 else if (utils.isPlayerPage() && ! playerID)
 {
   while(!playerID) {
-    playerID = window.prompt("Entrez le nom de votre personage :", dbUtils.randomName());
+    playerID = window.prompt("Entrez le nom de votre personage :", randomName());
   }
   console.log("Selected playerID: " + playerID)
   firebase.createPlayer(partyID, playerID, (newPlayerID) => utils.gotoUrl(utils.constructPlayerUrl(partyID, playerID)));
