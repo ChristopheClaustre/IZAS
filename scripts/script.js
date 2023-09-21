@@ -57,19 +57,20 @@ function initializeMJ() {
   
   // Synchronize position with firebase
   var pos_initialized = 0;
-  firebase.bindToPegman((pegman) => {
-    panorama.setPosition(pegman);
-    map.setCenter(pegman);
+  firebase.bindToPegman((_pegman) => {
+    pegman = _pegman;
+    panorama.setPosition(_pegman);
+    map.setCenter(_pegman);
     pos_initialized++;
   });
   
   // Update firebase when position is changed
   panorama.addListener("position_changed", () => {
-    if (pos_initialized >= 2) {
+    if (pos_initialized >= 1) {
       var position = panorama.getPosition();
       pegman.lat = position.lat();
       pegman.lng = position.lng();
-      setPegman(pegman);
+      firebase.setPegman(pegman);
     }
   });
   
