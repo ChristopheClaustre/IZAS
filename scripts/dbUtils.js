@@ -101,25 +101,34 @@ export class Firebase {
     this.connectingToPlayer = false;
   }
   isConnectedToPlayer() { return !!this.playerRef; } // is playerRef valid ?
-  async connectToPlayer(_playerID) {
+  async connectToPlayer(_playerID, bCreate = false) {
     this.deconnectFromPlayer();
     this.connectingToPlayer = true;
     
     while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
     if (! this.isConnectedToParty()) return false;
     
+    var bCreated = false;
+    
     this.playerIntegrityUnsubscriber = onValue(
       child(this.partyRef, playersKey),
       (snapshot) => {
-        if (! snapshot.exists()) { utils.throwError("Player '" + _playerID + "' doesn't exist anymore."); return; }
+        if (! snapshot.exists()) { utils.throwError("Error while retrieving players of party ID '" + _playerID + "'."); return; }
         var found = false;
         snapshot.forEach(child => found = found || child.key == _playerID);
         if (found) {
           this.playerRef = child(this.partyRef, playersKey + "/" + _playerID);
           this.connectingToPlayer = false;
         }
+        else if (bCreate && ! bCreated)
+        {
+          this.createPlayer(this.partyRef.key, _playerID, () => {});
+          bCreated = true;
+        }
         else
+        {
           utils.throwError("Player '" + _playerID + "' doesn't exist anymore.");
+        }
       },
       { shallow:true } // Get only children keys
     );

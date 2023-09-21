@@ -163,7 +163,7 @@ function initializePJ() {
   // Connect to party
   firebase.connectToParty(partyID);
   // Connect as player
-  firebase.connectToPlayer(playerID);
+  firebase.connectToPlayer(playerID, true);
   
   // Create maps objects
   var panorama = new google.maps.StreetViewPanorama(
