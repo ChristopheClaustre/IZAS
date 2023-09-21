@@ -13,6 +13,7 @@ function initializeMJ() {
   var map = new google.maps.Map(document.getElementById("map"), {
     center: pegman,
     zoom: 14,
+    mapTypeControl: false,
     fullscreenControl: false,
     motionTracking: false,
     motionTrackingControl: false
@@ -33,10 +34,13 @@ function initializeMJ() {
 
   map.setStreetView(panorama);
   
+  // Setup specific controls
+  const maps_control = document.getElementById("maps-control");
+  map.controls[google.maps.ControlPosition.TOP_CENTER].push(maps_control);
+  
   // Setup search box
-  const placesInput = document.getElementById("places-input");
-  const searchBox = new google.maps.places.SearchBox(placesInput);
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(placesInput);
+  const placesControl = document.getElementById("places-control");
+  const searchBox = new google.maps.places.SearchBox(placesControl);
   map.addListener("bounds_changed", () => {
     searchBox.setBounds(map.getBounds());
   });
@@ -51,9 +55,8 @@ function initializeMJ() {
   });
   
   // Setup recenter button
-  const recenterInput = document.getElementById("recenter-input");
-  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(recenterInput);
-  utils.bindEvent(recenterInput, "click", () => map.setCenter(panorama.position));
+  const recenterControl = document.getElementById("recenter-control");
+  utils.bindEvent(recenterControl, "click", () => map.setCenter(panorama.position));
   
   // Synchronize position with firebase
   var pos_initialized = 0;
@@ -157,6 +160,9 @@ function initializeMJ() {
     resume.trim();
     document.getElementById("players-resume").title = resume;
   });
+  
+  // Resize maps elements
+  Split(['#map', '#pano'], { sizes: [40, 60] });
 }
 
 function initializePJ() {
@@ -167,7 +173,7 @@ function initializePJ() {
   
   // Create maps objects
   var panorama = new google.maps.StreetViewPanorama(
-    document.getElementById("pano-pj"),
+    document.getElementById("pano"),
     {
       position: pegman,
       pov: {
@@ -232,6 +238,9 @@ function initializePJ() {
     document.getElementById("player-job").innerHTML = "<option>" + data.job + "</option>";
     document.getElementById("player-job").title = data.job + " :\n" + data.description;
   });
+  
+  // Resize maps elements
+  Split(['#pano'], { sizes: [100] });
 }
 
 // Connect to firebase

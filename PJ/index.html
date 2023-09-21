@@ -5,6 +5,7 @@
     <title>IZAS - Joueur</title>
     <link rel="icon" href="../img/favicon.png">
     <link rel="stylesheet" href="../styles/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.0/split.min.js"></script>
     <script type="module" src="../scripts/script.js"></script>
   </head>
   <body>
@@ -36,7 +37,9 @@
         <input type="button" id="copy-partyID" value="Copier"/>
       </div>
     </div>
-    <div id="pano-pj"></div>
+    <div id="maps">
+      <div id="pano"></div>
+    </div>
 
     <!--
       The `defer` attribute causes the callback to execute after the full HTML
