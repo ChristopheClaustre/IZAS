@@ -4,6 +4,21 @@ import { ref, onValue, get, set, child } from "https://www.gstatic.com/firebasej
 import { data as playerData, randomName } from "./player.js";
 import { data as defaultData } from "./default.js";
 
+function allowMaps()
+{
+  var gutter = document.querySelector(".gutter");
+  if (gutter) gutter.remove(); // remove root div for gutter
+  Split(['#map', '#pano'], { sizes: [40, 60] }); // create new gutter
+}
+
+function forbidMaps()
+{
+  var gutter = document.querySelector(".gutter");
+  if (gutter) gutter.remove(); // remove root div for gutter
+  document.getElementById("map").style.width = "0px"; // hide maps
+  Split(['#pano'], { sizes: [100] }); // create new gutter
+}
+
 // Initialize MJ and PJ functions
 function initializeMJ() {
   // Connect to party
@@ -31,12 +46,14 @@ function initializeMJ() {
       motionTrackingControl: false
     }
   );
-
   map.setStreetView(panorama);
+  allowMaps(); // MJ have always access to maps
   
   // Setup specific controls
   const maps_control = document.getElementById("maps-control");
   map.controls[google.maps.ControlPosition.TOP_CENTER].push(maps_control);
+  const options_control = document.getElementById("options-control");
+  map.controls[google.maps.ControlPosition.LEFT_CENTER].push(options_control);
   
   // Setup search box
   const placesControl = document.getElementById("places-control");
@@ -76,6 +93,12 @@ function initializeMJ() {
       firebase.setPegman(pegman);
     }
   });
+  
+  // display options
+  firebase.bindToOption("map_allowed", (allowed) => document.getElementById("map-allowed-control").checked = allowed );
+  
+  // check/uncheck options
+  utils.bindEvent(document.getElementById("map-allowed-control"), 'change', () => firebase.setOption('map_allowed', !!document.getElementById("map-allowed-control").checked));
   
   // display resources
   firebase.bindToResource("heal", (data) => document.getElementById("heal-count").value = data );
@@ -160,9 +183,6 @@ function initializeMJ() {
     resume.trim();
     document.getElementById("players-resume").title = resume;
   });
-  
-  // Resize maps elements
-  Split(['#map', '#pano'], { sizes: [40, 60] });
 }
 
 function initializePJ() {
@@ -189,6 +209,16 @@ function initializePJ() {
       clickToGo: false
     }
   );
+  var map = new google.maps.Map(document.getElementById("map"), {
+    center: pegman,
+    zoom: 14,
+    mapTypeControl: false,
+    fullscreenControl: false,
+    streetViewControl: false,
+    motionTracking: false,
+    motionTrackingControl: false
+  });
+  forbidMaps(); // by default, hidden
   
   // Disable movement with keyboard
   window.addEventListener(
@@ -218,9 +248,12 @@ function initializePJ() {
   
   // Display player's name
   document.getElementById("player-name").innerHTML = "<option>" + playerID + "</option>";
-
+  
   // Synchronize position with firebase
   firebase.bindToPegman((pegman) => panorama.setPosition(pegman));
+  
+  // display options
+  firebase.bindToOption("map_allowed", (allowed) => { if (allowed) allowMaps(); else forbidMaps(); });
   
   // display resources
   firebase.bindToResource("heal", (data) => document.getElementById("heal-count").value = data );
@@ -238,9 +271,6 @@ function initializePJ() {
     document.getElementById("player-job").innerHTML = "<option>" + data.job + "</option>";
     document.getElementById("player-job").title = data.job + " :\n" + data.description;
   });
-  
-  // Resize maps elements
-  Split(['#pano'], { sizes: [100] });
 }
 
 // Connect to firebase

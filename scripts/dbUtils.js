@@ -18,6 +18,7 @@ const firebaseConfig = {
 // Keys
 const partiesKey = "parties";
 const resourcesKey = "resources";
+const optionsKey = "options";
 const pegmanKey = "pegman";
 const playersKey = "players";
 const resistanceKey = "resistance";
@@ -149,6 +150,18 @@ export class Firebase {
       changedCallback(data);
     });
   }
+  // @return boolean, by default false
+  async bindToOption(optionName, changedCallback)
+  {
+    while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+    if (! this.isConnectedToParty()) return undefined;
+    
+    return onValue(child(this.partyRef, optionsKey + '/' + optionName), (snapshot) => {
+      if (! snapshot.exists()) { return changedCallback(false); }
+      const data = snapshot.val();
+      changedCallback(data);
+    });
+  }
   // @return { lat:number, lng:number }
   async bindToPegman(changedCallback)
   {
@@ -232,6 +245,13 @@ export class Firebase {
     if (! this.isConnectedToParty()) return;
     set(child(this.partyRef, resourcesKey + '/' + resourceName), newValue).catch((error) => {
       utils.throwError("Error when updating " + resourceName + " (" + error + ")");
+    });
+  }
+  setOption(optionName, newValue)
+  {
+    if (! this.isConnectedToParty()) return;
+    set(child(this.partyRef, optionsKey + '/' + optionName), newValue).catch((error) => {
+      utils.throwError("Error when updating " + optionName + " (" + error + ")");
     });
   }
   setPegman(newValue)
