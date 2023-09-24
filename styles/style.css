@@ -136,13 +136,7 @@ select[id="player-job"] {
 
 #map,
 #pano {
-    /* float: left; */
     height: 100%;
-}
-
-#pano-pj {
-    height: 87%;
-    width: 100%;
 }
 
 /* MAPS CONTROLS STYLING */
