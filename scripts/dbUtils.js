@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js';
-import { getDatabase, ref, push, set, get, onValue, child } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+import { getDatabase, ref, push, set, get, onValue, child, query, orderByChild, remove } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js';
 import * as utils from "./utils.js";
 import { data as player } from "./player.js";
 import { data as defaultData } from "./default.js";
@@ -20,6 +20,7 @@ const partiesKey = "parties";
 const resourcesKey = "resources";
 const optionsKey = "options";
 const pegmanKey = "pegman";
+const timestampKey = "timestamp";
 const playersKey = "players";
 const resistanceKey = "resistance";
 const jobIDKey = "jobID";
@@ -42,12 +43,41 @@ export class Firebase {
   }
   
   /* Data Creation */
-  createParty(createdCallback)
+  _internalCreateParty = function (createdCallback)
   {
-    push(ref(this.db, partiesKey + '/'), {pegman: defaultData.pegman, resources: defaultData.resources}).then((snapshot) => {
+    push(ref(this.db, partiesKey + '/'), {pegman: defaultData.pegman, resources: defaultData.resources, timestamp: Date.now()}).then((snapshot) => {
       createdCallback(snapshot.key);
     }).catch((error) => {
       utils.throwError("Error when creating new party (" + error + ")");
+    });
+  }
+  createParty(createdCallback)
+  {
+    var q = query(ref(this.db, partiesKey), orderByChild(timestampKey));
+    get(q).then((snapshot) => {
+      if (! snapshot.exists()) { console.log("Error when retrieving parties."); return; }
+      // Retrieve parties
+      const partiesData = snapshot.val();
+      console.log(partiesData);
+      var partiesKeys = Object.keys(partiesData);
+      var partiesCount = partiesKeys.length;
+      var i = 0;
+      while (i < partiesCount && partiesCount - i > 9) { // We preserve the last 10 parties
+        var removedKey = partiesKeys[i];
+        var removedTimestamp = new Date(partiesData[removedKey].timestamp);
+        if (Date.now() - removedTimestamp < (1000 * 60 * 60 * 1))
+        { // We preserve the parties last updated earlier than 1 hour ago
+          utils.throwError("Too much parties at the same time.");
+          return; // Early quit
+        };
+        console.log("Remove party: " + removedKey);
+        remove(ref(this.db, partiesKey + "/" + removedKey));
+        i++;
+      }
+      // Create effectively the party
+      this._internalCreateParty(createdCallback);
+    }).catch((error) => {
+      utils.throwError("Error when retrieving parties (" + error + ")");
     });
   }
   createPlayer(_partyID, _playerID, createdCallback)
@@ -60,6 +90,7 @@ export class Firebase {
     
     set(ref(this.db, partiesKey + '/' + _partyID + '/' + playersKey + '/' + _playerID), playerData).then((snapshot) => {
       createdCallback();
+      this._internalUpdateTimestamp();
     }).catch((error) => {
       utils.throwError("Error when creating new player (" + error + ")");
     });
@@ -246,6 +277,7 @@ export class Firebase {
     set(child(this.partyRef, resourcesKey + '/' + resourceName), newValue).catch((error) => {
       utils.throwError("Error when updating " + resourceName + " (" + error + ")");
     });
+    this._internalUpdateTimestamp();
   }
   setOption(optionName, newValue)
   {
@@ -253,6 +285,7 @@ export class Firebase {
     set(child(this.partyRef, optionsKey + '/' + optionName), newValue).catch((error) => {
       utils.throwError("Error when updating " + optionName + " (" + error + ")");
     });
+    this._internalUpdateTimestamp();
   }
   setPegman(newValue)
   {
@@ -260,12 +293,23 @@ export class Firebase {
     set(child(this.partyRef, pegmanKey), newValue).catch((error) => {
       utils.throwError("Error when updating pegman (" + error + ")");
     });
+    this._internalUpdateTimestamp();
   }
   setPlayerAttribute(playerID, attributeName, newValue)
   {
     if (! this.isConnectedToParty()) return;
     set(child(this.partyRef, playersKey + '/' + playerID + '/' + attributeName), newValue).catch((error) => {
       utils.throwError("Error when updating " + attributeName + " for player \"" + playerID + "\" (" + error + ")");
+    });
+    this._internalUpdateTimestamp();
+  }
+  
+  /* private function */
+  _internalUpdateTimestamp()
+  {
+    if (! this.isConnectedToParty()) return;
+    set(child(this.partyRef, timestampKey), Date.now()).catch((error) => {
+      console.log("Error when updating timestamp (" + error + ")");
     });
   }
 }
