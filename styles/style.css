@@ -82,7 +82,7 @@ input[readonly] {
 input[type=number] {
     border: solid 1px;
     border-radius: 4px;
-    width: 3em;
+    width: 2em;
     text-align: center;
 }
 
