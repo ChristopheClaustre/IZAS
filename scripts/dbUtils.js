@@ -23,6 +23,7 @@ const pegmanKey = "pegman";
 const timestampKey = "timestamp";
 const playersKey = "players";
 const resistanceKey = "resistance";
+const sanityKey = "sanity";
 const jobIDKey = "jobID";
 
 export class Firebase {
@@ -84,8 +85,11 @@ export class Firebase {
   {
     var playerData = defaultData.player;
     var resistance = 1 + utils.getRandomInt(3);
+    var sanity = 1 + utils.getRandomInt(3);
     playerData.resistance.current = resistance;
     playerData.resistance.max = resistance;
+    playerData.sanity.current = sanity;
+    playerData.sanity.max = sanity;
     playerData.jobID = utils.getRandomInt(player.jobsList.length);
     
     set(ref(this.db, partiesKey + '/' + _partyID + '/' + playersKey + '/' + _playerID), playerData).then((snapshot) => {
@@ -241,6 +245,18 @@ export class Firebase {
 
     return onValue(child(this.playerRef, resistanceKey), (snapshot) => {
       if (! snapshot.exists()) { console.log("Error while retrieving resistance from player '" + this.playerRef.key + "'."); return; }
+      const data = snapshot.val();
+      changedCallback(data);
+    });
+  }
+  // @return { current:int, max:int }
+  async bindToSanity(changedCallback)
+  {
+    while (this.connectingToPlayer) { await new Promise(resolve => setTimeout(resolve, 500)); }
+    if (! this.isConnectedToPlayer()) return undefined;
+
+    return onValue(child(this.playerRef, sanityKey), (snapshot) => {
+      if (! snapshot.exists()) { console.log("Error while retrieving sanity from player '" + this.playerRef.key + "'."); return; }
       const data = snapshot.val();
       changedCallback(data);
     });

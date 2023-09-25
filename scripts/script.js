@@ -117,16 +117,26 @@ function initializeMJ() {
     if (selectedPlayer) {
       firebase.getPlayer(selectedPlayer, (player) => {
         document.getElementById("player-job").value = playerData.jobsList[player.jobID].job;
+        // Resistance
         document.getElementById("player-resistance").max = player.resistance.max;
         document.getElementById("player-resistance").value = player.resistance.current;
         document.getElementById("player-resistance-max").value = player.resistance.max;
+        // Sanity
+        document.getElementById("player-sanity").max = player.sanity.max;
+        document.getElementById("player-sanity").value = player.sanity.current;
+        document.getElementById("player-sanity-max").value = player.sanity.max;
       });
     }
     else {
       document.getElementById("player-job").value = "";
+      // Resistance
       document.getElementById("player-resistance").max = 4;
       document.getElementById("player-resistance").value = 4;
       document.getElementById("player-resistance-max").value = 4;
+      // Sanity
+      document.getElementById("player-sanity").max = 4;
+      document.getElementById("player-sanity").value = 4;
+      document.getElementById("player-sanity-max").value = 4;
     }
   };
   utils.bindEvent(document.getElementById("player-job"), 'change', () => {
@@ -154,6 +164,22 @@ function initializeMJ() {
       }
       document.getElementById("player-resistance").max = resistanceMax;
       firebase.setPlayerAttribute(selectedPlayer, 'resistance/max', resistanceMax);
+    }
+  });
+  utils.bindEvent(document.getElementById("player-sanity"), 'change', () => {
+    if (selectedPlayer) {
+      firebase.setPlayerAttribute(selectedPlayer, 'sanity/current', parseInt(document.getElementById("player-sanity").value));
+    }
+  });
+  utils.bindEvent(document.getElementById("player-sanity-max"), 'change', () => {
+    if (selectedPlayer) {
+      const sanityMax = parseInt(document.getElementById("player-sanity-max").value);
+      if (parseInt(document.getElementById("player-sanity").value) > sanityMax) {
+        firebase.setPlayerAttribute(selectedPlayer, 'sanity/current', sanityMax);
+        document.getElementById("player-sanity").value = sanityMax;
+      }
+      document.getElementById("player-sanity").max = sanityMax;
+      firebase.setPlayerAttribute(selectedPlayer, 'sanity/max', sanityMax);
     }
   });
   utils.bindEvent(document.getElementById("player-name"), 'change', onPlayerChanged);
@@ -187,7 +213,7 @@ function initializeMJ() {
   // party resume
   firebase.bindToPlayers((players) => {
     var resume = "";
-    Object.keys(players).forEach(playerID => resume += playerID + " (" + players[playerID].resistance.current + "/" + players[playerID].resistance.max + ") : " + playerData.jobsList[players[playerID].jobID].job + "\n");
+    Object.keys(players).forEach(playerID => resume += playerID + " (IZAS: " + players[playerID].resistance.current + "/" + players[playerID].resistance.max + ", Sanity: " + players[playerID].sanity.current + "/" + players[playerID].sanity.max + ") : " + playerData.jobsList[players[playerID].jobID].job + "\n");
     resume.trim();
     document.getElementById("players-resume").title = resume;
   });
@@ -272,6 +298,12 @@ function initializePJ() {
   firebase.bindToResistance((data) => {
     document.getElementById("player-resistance").value = data.current;
     document.getElementById("player-resistance-max").value = data.max;
+  });
+  
+  // display sanity
+  firebase.bindToSanity((data) => {
+    document.getElementById("player-sanity").value = data.current;
+    document.getElementById("player-sanity-max").value = data.max;
   });
   
   // display job
