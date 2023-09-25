@@ -117,12 +117,14 @@ function initializeMJ() {
     if (selectedPlayer) {
       firebase.getPlayer(selectedPlayer, (player) => {
         document.getElementById("player-job").value = playerData.jobsList[player.jobID].job;
+        document.getElementById("player-resistance").max = player.resistance.max;
         document.getElementById("player-resistance").value = player.resistance.current;
         document.getElementById("player-resistance-max").value = player.resistance.max;
       });
     }
     else {
       document.getElementById("player-job").value = "";
+      document.getElementById("player-resistance").max = 4;
       document.getElementById("player-resistance").value = 4;
       document.getElementById("player-resistance-max").value = 4;
     }
@@ -145,7 +147,13 @@ function initializeMJ() {
   });
   utils.bindEvent(document.getElementById("player-resistance-max"), 'change', () => {
     if (selectedPlayer) {
-      firebase.setPlayerAttribute(selectedPlayer, 'resistance/max', parseInt(document.getElementById("player-resistance-max").value));
+      const resistanceMax = parseInt(document.getElementById("player-resistance-max").value);
+      if (parseInt(document.getElementById("player-resistance").value) > resistanceMax) {
+        firebase.setPlayerAttribute(selectedPlayer, 'resistance/current', resistanceMax);
+        document.getElementById("player-resistance").value = resistanceMax;
+      }
+      document.getElementById("player-resistance").max = resistanceMax;
+      firebase.setPlayerAttribute(selectedPlayer, 'resistance/max', resistanceMax);
     }
   });
   utils.bindEvent(document.getElementById("player-name"), 'change', onPlayerChanged);
