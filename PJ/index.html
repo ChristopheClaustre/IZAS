@@ -1,4 +1,5 @@
 ---
+title: IZAS - Joueur
 ---
 <!DOCTYPE html>
 <html lang="fr">
@@ -12,26 +13,13 @@
     <script type="module" src="./pj.js"></script>
   </head>
   <body>
-    {% include header.html %}
-    {% include party-info.html %}
+    {% include header.html title=page.title %}
+    {% include party-info.html player_label="Vous :" readonly=true %}
     <div id="maps">
       <div id="map"></div>
       <div id="pano"></div>
     </div>
 
-    <script>
-      document.querySelector("#title-h1").innerHTML = "IZAS - Joueur";
-      document.querySelector("#heal-count").readOnly = true;
-      document.querySelector("#confort-count").readOnly = true;
-      document.querySelector("#foods-count").readOnly = true;
-      document.querySelector("#players-resume").innerHTML = "Vous :";
-      document.querySelector("#player-name").disabled = true;
-      document.querySelector("#player-job").disabled = true;
-      document.querySelector("#player-resistance").readOnly = true;
-      document.querySelector("#player-resistance-max").readOnly = true;
-      document.querySelector("#player-sanity").readOnly = true;
-      document.querySelector("#player-sanity-max").readOnly = true;
-    </script>
     <!--
       The `defer` attribute causes the callback to execute after the full HTML
       document has been parsed. For non-blocking uses, avoiding race conditions,

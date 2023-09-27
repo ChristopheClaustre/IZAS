@@ -1,10 +1,11 @@
 ---
+title: IZAS - Maître du Jeu
 ---
 <!DOCTYPE html>
 <html lang="fr">
   <head>
     <meta charset="utf-8">
-    <title>IZAS - Maître du Jeu</title>
+    <title>{{ page.title }}</title>
     <link rel="icon" href="../img/favicon.png">
     <link rel="stylesheet" href="../styles/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.0/split.min.js"></script>
@@ -12,8 +13,8 @@
     <script type="module" src="./mj.js"></script>
   </head>
   <body>
-    {% include header.html %}
-    {% include party-info.html %}
+    {% include header.html title=page.title %}
+    {% include party-info.html player_label="Joueurs :" %}
     <div id="maps-control">
       <input id="places-control" type="text" placeholder="Rechercher un lieu" />
       <input id="recenter-control" type="button" value="Recentrer" />
@@ -26,9 +27,6 @@
       <div id="pano"></div>
     </div>
 
-    <script>
-      document.querySelector("#title-h1").innerHTML = "IZAS - Maître du Jeu";
-    </script>
     <!--
       The `defer` attribute causes the callback to execute after the full HTML
       document has been parsed. For non-blocking uses, avoiding race conditions,
