@@ -59,7 +59,6 @@ export class Firebase {
       if (! snapshot.exists()) { console.log("Error when retrieving parties."); return; }
       // Retrieve parties
       const partiesData = snapshot.val();
-      console.log(partiesData);
       var partiesKeys = Object.keys(partiesData);
       var partiesCount = partiesKeys.length;
       var i = 0;
