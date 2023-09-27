@@ -148,7 +148,7 @@ export class Firebase {
     this.playerIntegrityUnsubscriber = onValue(
       child(this.partyRef, playersKey),
       (snapshot) => {
-        if (! snapshot.exists()) { utils.throwError("Error while retrieving players of party ID '" + _playerID + "'."); return; }
+        if (! snapshot.exists() && (!bCreate || bCreated)) { utils.throwError("Error while retrieving players of party ID '" + this.partyRef.key + "'."); return; }
         var found = false;
         snapshot.forEach(child => found = found || child.key == _playerID);
         if (found) {
