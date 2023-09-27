@@ -1,7 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js';
 import { getDatabase, ref, push, set, get, onValue, child, query, orderByChild, remove } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js';
 import * as utils from "./utils.js";
-import { data as player } from "./player.js";
+import { data as playerData } from "./player.js";
 import { data as defaultData } from "./default.js";
 
 // Firebase configuration
@@ -90,7 +90,7 @@ export class Firebase {
     playerData.resistance.max = resistance;
     playerData.sanity.current = sanity;
     playerData.sanity.max = sanity;
-    playerData.jobID = utils.getRandomInt(player.jobsList.length);
+    playerData.jobID = utils.getRandomInt(playerData.jobsList.length);
     
     set(ref(this.db, partiesKey + '/' + _partyID + '/' + playersKey + '/' + _playerID), playerData).then((snapshot) => {
       createdCallback();
@@ -269,7 +269,7 @@ export class Firebase {
 
     return onValue(child(this.playerRef, jobIDKey), (snapshot) => {
       if (! snapshot.exists()) { console.log("Error while retrieving jobID from player '" + this.playerRef.key + "'."); return; }
-      const data = player.jobsList[snapshot.val()];
+      const data = playerData.jobsList[snapshot.val()];
       changedCallback(data);
     });
   }
