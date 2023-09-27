@@ -8,7 +8,8 @@
     <link rel="icon" href="../img/favicon.png">
     <link rel="stylesheet" href="../styles/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.0/split.min.js"></script>
-    <script type="module" src="../scripts/script.js"></script>
+    <script type="module" src="../scripts/mapUtils.js"></script>
+    <script type="module" src="./pj.js"></script>
   </head>
   <body>
     {% include header.html %}
@@ -39,7 +40,7 @@
       for more information.
       -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJevSj89wDoaoxPWJ7K0mHz7RFdZ1fyw0&callback=initializePJ&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJevSj89wDoaoxPWJ7K0mHz7RFdZ1fyw0&callback=initialize&v=weekly"
       defer
     ></script>
   </body>

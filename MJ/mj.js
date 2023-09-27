@@ -1,28 +1,11 @@
-import * as dbUtils from "./dbUtils.js";
-import * as utils from "./utils.js";
-import { ref, onValue, get, set, child } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
-import { data as playerData, randomName } from "./player.js";
-import { data as defaultData } from "./default.js";
+import { Firebase } from "../scripts/dbUtils.js";
+import * as utils from "../scripts/utils.js";
+import { data as playerData, randomName } from "../scripts/player.js";
+import { data as defaultData } from "../scripts/default.js";
 
-function allowMaps()
-{
-  var gutter = document.querySelector(".gutter");
-  if (gutter) gutter.remove(); // remove root div for gutter
-  Split(['#map', '#pano'], { sizes: [40, 60] }); // create new gutter
-}
-
-function forbidMaps()
-{
-  var gutter = document.querySelector(".gutter");
-  if (gutter) gutter.remove(); // remove root div for gutter
-  document.getElementById("map").style.width = "0px"; // hide maps
-  Split(['#pano'], { sizes: [100] }); // create new gutter
-}
-
-// Initialize MJ and PJ functions
 function initializeMJ() {
-  // Connect to party
-  firebase.connectToParty(partyID);
+  // Initialize maps values
+  var pegman = defaultData.pegman;
   
   // Create maps objects
   var map = new google.maps.Map(document.getElementById("map"), {
@@ -47,7 +30,7 @@ function initializeMJ() {
     }
   );
   map.setStreetView(panorama);
-  allowMaps(); // MJ have always access to maps
+  Split(['#map', '#pano'], { sizes: [40, 60] }); // MJ have always access to maps
   
   // Setup specific controls
   const maps_control = document.getElementById("maps-control");
@@ -219,145 +202,34 @@ function initializeMJ() {
   });
 }
 
-function initializePJ() {
-  // Connect to party
-  firebase.connectToParty(partyID);
-  // Connect as player
-  firebase.connectToPlayer(playerID, true);
-  
-  // Create maps objects
-  var panorama = new google.maps.StreetViewPanorama(
-    document.getElementById("pano"),
-    {
-      position: pegman,
-      pov: {
-        heading: 34,
-        pitch: 10,
-      },
-      fullscreenControl: false,
-      motionTracking: false,
-      motionTrackingControl: false,
-      addressControl: false,
-      linksControl: false,
-      enableCloseButton: false,
-      clickToGo: false
-    }
-  );
-  var map = new google.maps.Map(document.getElementById("map"), {
-    center: pegman,
-    zoom: 14,
-    mapTypeControl: false,
-    fullscreenControl: false,
-    streetViewControl: false,
-    motionTracking: false,
-    motionTrackingControl: false
-  });
-  forbidMaps(); // by default, hidden
-  
-  // Disable movement with keyboard
-  window.addEventListener(
-    'keydown',
-    (event) => {
-      if (
-        (
-          // Change or remove this condition depending on your requirements.
-             event.key === 'ArrowUp' // Move forward
-          || event.key === 'ArrowDown' // Move forward
-          /*||   event.key === 'ArrowLeft' // Pan left
-          ||   event.key === 'ArrowRight' // Pan right
-          ||   event.key === '+' // Zoom in
-          ||   event.key === '=' // Zoom in
-          ||   event.key === '_' // Zoom out
-          ||   event.key === '-' // Zoom out*/
-        ) &&
-        !event.metaKey &&
-        !event.altKey &&
-        !event.ctrlKey
-      ) {
-        event.stopPropagation()
-      };
-    },
-    { capture: true },
-  );
-  
-  // Display player's name
-  document.getElementById("player-name").innerHTML = "<option>" + playerID + "</option>";
-  
-  // Synchronize position with firebase
-  firebase.bindToPegman((pegman) => panorama.setPosition(pegman));
-  
-  // display options
-  firebase.bindToOption("map_allowed", (allowed) => { if (allowed) allowMaps(); else forbidMaps(); });
-  
-  // display resources
-  firebase.bindToResource("heal", (data) => document.getElementById("heal-count").value = data );
-  firebase.bindToResource("confort", (data) => document.getElementById("confort-count").value = data );
-  firebase.bindToResource("foods", (data) => document.getElementById("foods-count").value = data );
-  
-  // display resistance
-  firebase.bindToResistance((data) => {
-    document.getElementById("player-resistance").value = data.current;
-    document.getElementById("player-resistance-max").value = data.max;
-  });
-  
-  // display sanity
-  firebase.bindToSanity((data) => {
-    document.getElementById("player-sanity").value = data.current;
-    document.getElementById("player-sanity-max").value = data.max;
-  });
-  
-  // display job
-  firebase.bindToJob((data) => {
-    document.getElementById("player-job").innerHTML = "<option>" + data.job + "</option>";
-    document.getElementById("player-job").title = data.job + " :\n" + data.description;
-  });
-}
-
-// Connect to firebase
-var firebase = new dbUtils.Firebase();
-
-// Initialize maps values
-var pegman = defaultData.pegman;
-
-// Manage query string (and retrieve party ID if possible)
-const urlParams = new URLSearchParams(window.location.search);
-var partyID = urlParams.get("partyID", "");
-var playerID = urlParams.get("playerID", "");
-
-// Check partyID
-if ( ! partyID )
-{
-  if (utils.isPlayerPage()) // Not allowed, return to main page
-  {
-    utils.throwError("No Party ID set.");
-  }
-  else
-  {
-    firebase.createParty((newPartyID) => utils.gotoUrl(utils.constructMasterUrl(newPartyID)));
-  }
-}
-// Check player's name
-else if (utils.isPlayerPage() && ! playerID)
-{
-  while(!playerID) {
-    playerID = window.prompt("Entrez le nom de votre personage :", randomName());
-  }
-  console.log("Selected playerID: " + playerID)
-  firebase.createPlayer(partyID, playerID, (newPlayerID) => utils.gotoUrl(utils.constructPlayerUrl(partyID, playerID)));
-}
-else
-{
+function main(partyID) {
   // Display partyID
   document.getElementById("partyID").value = partyID;
   utils.bindEvent(document.getElementById("copy-partyID"), 'click', () => navigator.clipboard.writeText(partyID));
 
+  // Connect to party
+  firebase.connectToParty(partyID);
+
   // Initialize for maps
-  if (utils.isPlayerPage())
-  {
-    window.initializePJ = initializePJ;
-  }
-  else
-  {
-    window.initializeMJ = initializeMJ;
-  }
+  registerInitialize(initializeMJ);
+}
+
+// Connect to firebase
+var firebase = new Firebase();
+
+// Manage query string (and retrieve party ID if possible)
+const urlParams = new URLSearchParams(window.location.search);
+var partyID = urlParams.get("partyID", "");
+
+// Check partyID
+if ( ! partyID )
+{
+  await firebase.createParty((newPartyID) => {
+    utils.updateURL(utils.updateURLParameter(window.location.href, "partyID", newPartyID));
+    main(newPartyID);
+  });
+}
+else
+{
+  main(partyID);
 }
