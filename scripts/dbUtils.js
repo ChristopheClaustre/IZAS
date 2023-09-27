@@ -82,16 +82,16 @@ export class Firebase {
   }
   createPlayer(_partyID, _playerID, createdCallback)
   {
-    var playerData = defaultData.player;
+    var player = defaultData.player;
     var resistance = 1 + utils.getRandomInt(3);
     var sanity = 1 + utils.getRandomInt(3);
-    playerData.resistance.current = resistance;
-    playerData.resistance.max = resistance;
-    playerData.sanity.current = sanity;
-    playerData.sanity.max = sanity;
-    playerData.jobID = utils.getRandomInt(playerData.jobsList.length);
+    player.resistance.current = resistance;
+    player.resistance.max = resistance;
+    player.sanity.current = sanity;
+    player.sanity.max = sanity;
+    player.jobID = utils.getRandomInt(playerData.jobsList.length);
     
-    set(ref(this.db, partiesKey + '/' + _partyID + '/' + playersKey + '/' + _playerID), playerData).then((snapshot) => {
+    set(ref(this.db, partiesKey + '/' + _partyID + '/' + playersKey + '/' + _playerID), player).then((snapshot) => {
       createdCallback();
       this._internalUpdateTimestamp();
     }).catch((error) => {
