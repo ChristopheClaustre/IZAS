@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js';
-import { getDatabase, ref, push, set, get, onValue, child, query, orderByChild, remove } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js';
+import { getDatabase, ref, push, set, get, onValue, child, query, orderByChild, remove, increment } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js';
 import * as utils from "./utils.js";
 import { data as playerData } from "./player.js";
 import { data as defaultData } from "./default.js";
@@ -91,11 +91,17 @@ export class Firebase {
     player.sanity.max = sanity;
     player.jobID = utils.getRandomInt(playerData.jobsList.length);
     
+    // Create player
     set(ref(this.db, partiesKey + '/' + _partyID + '/' + playersKey + '/' + _playerID), player).then((snapshot) => {
       createdCallback();
       this._internalUpdateTimestamp();
     }).catch((error) => {
       utils.throwError("Error when creating new player (" + error + ")");
+    });
+    
+    // Increment party's space by 3
+    set(ref(this.db, partiesKey + '/' + _partyID + '/' + resourcesKey + '/' + 'space'), increment(3)).catch((error) => {
+      utils.throwError("Error when updating space (" + error + ")");
     });
   }
   

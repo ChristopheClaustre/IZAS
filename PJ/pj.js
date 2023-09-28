@@ -92,9 +92,11 @@ function initializePJ() {
   firebase.bindToOption("map_allowed", (allowed) => { if (allowed) allowMaps(); else forbidMaps(); });
   
   // display resources
-  firebase.bindToResource("heal", (data) => document.getElementById("heal-count").value = data );
-  firebase.bindToResource("confort", (data) => document.getElementById("confort-count").value = data );
-  firebase.bindToResource("foods", (data) => document.getElementById("foods-count").value = data );
+  function updateSpaceCount() { document.getElementById("space-count").value = parseInt(document.getElementById("heal-count").value) + parseInt(document.getElementById("confort-count").value) + parseInt(document.getElementById("foods-count").value); }
+  firebase.bindToResource("heal",    (data) => { document.getElementById("heal-count").value = data;    updateSpaceCount(); } );
+  firebase.bindToResource("confort", (data) => { document.getElementById("confort-count").value = data; updateSpaceCount(); } );
+  firebase.bindToResource("foods",   (data) => { document.getElementById("foods-count").value = data;   updateSpaceCount(); } );
+  firebase.bindToResource("space",   (data) => { document.getElementById("space-max").value = data;     updateSpaceCount(); } );
   
   // display resistance
   firebase.bindToResistance((data) => {

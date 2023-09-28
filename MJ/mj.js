@@ -84,14 +84,17 @@ function initializeMJ() {
   utils.bindEvent(document.getElementById("map-allowed-control"), 'change', () => firebase.setOption('map_allowed', !!document.getElementById("map-allowed-control").checked));
   
   // display resources
-  firebase.bindToResource("heal", (data) => document.getElementById("heal-count").value = data );
-  firebase.bindToResource("confort", (data) => document.getElementById("confort-count").value = data );
-  firebase.bindToResource("foods", (data) => document.getElementById("foods-count").value = data );
+  function updateSpaceCount() { document.getElementById("space-count").value = parseInt(document.getElementById("heal-count").value) + parseInt(document.getElementById("confort-count").value) + parseInt(document.getElementById("foods-count").value); }
+  firebase.bindToResource("heal",    (data) => { document.getElementById("heal-count").value = data;    updateSpaceCount(); } );
+  firebase.bindToResource("confort", (data) => { document.getElementById("confort-count").value = data; updateSpaceCount(); } );
+  firebase.bindToResource("foods",   (data) => { document.getElementById("foods-count").value = data;   updateSpaceCount(); } );
+  firebase.bindToResource("space",   (data) => { document.getElementById("space-max").value = data;     updateSpaceCount(); } );
   
   // +/- resources
   utils.bindEvent(document.getElementById("heal-count"), 'change', () => firebase.setResource('heal', parseInt(document.getElementById("heal-count").value)));
   utils.bindEvent(document.getElementById("confort-count"), 'change', () => firebase.setResource('confort', parseInt(document.getElementById("confort-count").value)));
   utils.bindEvent(document.getElementById("foods-count"), 'change', () => firebase.setResource('foods', parseInt(document.getElementById("foods-count").value)));
+  utils.bindEvent(document.getElementById("space-max"), 'change', () => firebase.setResource('space', parseInt(document.getElementById("space-max").value)));
   
   // bind callback for player edition
   var selectedPlayer = "";
