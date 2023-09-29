@@ -1,5 +1,5 @@
 <div id="header" class="flex_row_centered">
-  <img class="flipped l-icon" src="../img/header.png"/>
-  <h1>{{ include.title }}</h1>
-  <img class="l-icon" src="../img/header.png"/>
+    <img class="flipped l-icon" src="{% if include.title %}..{% else %}.{% endif %}/img/header.png"/>
+    <h1>{{ include.title | default: site.title }}</h1>
+    <img class="l-icon" src="{% if include.title %}..{% else %}.{% endif %}/img/header.png"/>
 </div>

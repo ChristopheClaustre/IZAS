@@ -3,36 +3,36 @@ title: IZAS
 ---
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="utf-8">
-    <title>{{ page.title }}</title>
-    <link rel="icon" href="img/favicon.png">
-    <link rel="stylesheet" href="styles/style.css">
-  </head>
-  <body>
-    {% include header.html title=page.title %}
-    <div class="flex_column_centered">
-      <h2>- JOUEUR -</h2>
-      <form class="flex_column_centered" action="PJ/" onsubmit="">
-        <div class="flex_row_centered">
-          <label>Index d'équipe (demande à ton MJ) :</label>
-          <input type="text" id="partyID" name="partyID" required />
+    <head>
+        <meta charset="utf-8">
+        <title>{{ site.title }}</title>
+        <link rel="icon" href="img/favicon.png">
+        <link rel="stylesheet" href="styles/style.css">
+    </head>
+    <body>
+        {% include header.html %}
+        <div class="flex_column_centered">
+            <h2>- JOUEUR -</h2>
+            <form class="flex_column_centered" action="PJ/" onsubmit="">
+                <div class="flex_row_centered">
+                    <label>Index d'équipe (demande à ton MJ) :</label>
+                    <input type="text" id="partyID" name="partyID" required />
+                </div>
+                <div class="flex_row_centered">
+                    <label>Nom du personnage :</label>
+                    <input type="text" id="playerID" name="playerID" required />
+                    <input type="button" id="random-playerID" value="Hasard !"/>
+                </div>
+                <input type="submit" value="Jouer !"/>
+            </form>
+            <h2>- MAITRE DU JEU -</h2>
+            <form action="MJ/"><input type="submit" value="Créer une partie"/></form>
         </div>
-        <div class="flex_row_centered">
-          <label>Nom du personnage :</label>
-          <input type="text" id="playerID" name="playerID" required />
-          <input type="button" id="random-playerID" value="Hasard !"/>
-        </div>
-        <input type="submit" value="Jouer !"/>
-      </form>
-      <h2>- MAITRE DU JEU -</h2>
-      <form action="MJ/"><input type="submit" value="Créer une partie"/></form>
-    </div>
-    
-    <script type="module">
-      import { randomName } from "./scripts/player.js";
-      import { bindEvent } from "./scripts/utils.js";
-      bindEvent(document.getElementById("random-playerID"), 'click', () => document.getElementById("playerID").value = randomName());
-    </script>
-  </body>
+
+        <script type="module">
+            import { randomName } from "./scripts/player.js";
+            import { bindEvent } from "./scripts/utils.js";
+            bindEvent(document.getElementById("random-playerID"), 'click', () => document.getElementById("playerID").value = randomName());
+        </script>
+    </body>
 </html>

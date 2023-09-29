@@ -1,30 +1,30 @@
 <div id="party-info" class="flex_row_sbetween">
-  <div id="party-resources" class="flex_row_centered">
-    <img src="../img/heal.png" class="s-icon" title="Kit(s) de soin de l'équipe"/>
-    <input id="heal-count" type="number" title="Kit(s) de soin de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly{% endif %} />
-    <img src="../img/confort.png" class="s-icon" title="Kit(s) de confort de l'équipe"/>
-    <input id="confort-count" type="number" title="Kit(s) de confort de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly{% endif %} />
-    <img src="../img/foods.png" class="s-icon" title="Ration(s) de nourriture de l'équipe"/>
-    <input id="foods-count" type="number" title="Ration(s) de nourriture de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly{% endif %} />
-    <img src="../img/space.png" class="s-icon" title="Emplacement(s) disponible de l'équipe"/>
-    <input id="space-count" type="number" title="Emplacement(s) disponible de l'équipe" value="0" min="0" max="50" readonly /><p style="margin:0;">/</p>
-    <input id="space-max" type="number" title="Emplacement(s) disponible de l'équipe" value="0" min="0" max="50" {% if include.readonly %}readonly{% endif %} />
-  </div>
-  <div id="player-info" class="flex_row_centered">
-    <p id="players-resume">{{ include.player_label }}</p>
-    <select id="player-name" {% if include.readonly %}disabled{% endif %}></select>
-    <select id="player-job" {% if include.readonly %}disabled{% endif %} ></select>
-    <img class="flipped s-icon" title="Résistance à l'IZAS" src="../img/header.png"/>
-    <input type="number" id="player-resistance" title="Résistance courante à l'IZAS" value="4" min="0" max="4" {% if include.readonly %}readonly{% endif %} /><p style="margin:0;">/</p>
-    <input type="number" id="player-resistance-max" title="Résistance maximum à l'IZAS" value="4" min="1" max="4" {% if include.readonly %}readonly{% endif %} />
-    
-    <img class="flipped s-icon" title="Moral" src="../img/sanity.png"/>
-    <input type="number" id="player-sanity" title="Moral courant" value="4" min="0" max="4" {% if include.readonly %}readonly{% endif %} /><p style="margin:0;">/</p>
-    <input type="number" id="player-sanity-max" title="Moral maximum" value="4" min="1" max="4"  {% if include.readonly %}readonly{% endif %} />
-  </div>
-  <div id="party-id" class="flex_row_centered">
-    <label>Index d'équipe :</label>
-    <input type="text" id="partyID" readonly/>
-    <input type="button" id="copy-partyID" value="Copier"/>
-  </div>
+    <div id="party-resources" class="flex_row_centered">
+        <img src="../img/heal.png" class="s-icon" title="Kit(s) de soin de l'équipe"/>
+        <input id="heal-count" type="number" title="Kit(s) de soin de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly{% endif %} />
+        <img src="../img/confort.png" class="s-icon" title="Kit(s) de confort de l'équipe"/>
+        <input id="confort-count" type="number" title="Kit(s) de confort de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly{% endif %} />
+        <img src="../img/foods.png" class="s-icon" title="Ration(s) de nourriture de l'équipe"/>
+        <input id="foods-count" type="number" title="Ration(s) de nourriture de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly{% endif %} />
+        <img src="../img/space.png" class="s-icon" title="Emplacement(s) disponible de l'équipe"/>
+        <input id="space-count" type="number" title="Emplacement(s) disponible de l'équipe" value="0" min="0" max="50" readonly /><p style="margin:0;">/</p>
+        <input id="space-max" type="number" title="Emplacement(s) disponible de l'équipe" value="0" min="0" max="50" {% if include.readonly %}readonly{% endif %} />
+    </div>
+    <div id="player-info" class="flex_row_centered">
+        <p id="players-resume">{{ include.player_label }}</p>
+        <select id="player-name" {% if include.readonly %}disabled{% endif %}></select>
+        <select id="player-job" {% if include.readonly %}disabled{% endif %} ></select>
+        <img class="flipped s-icon" title="Résistance à l'IZAS" src="../img/header.png"/>
+        <input type="number" id="player-resistance" title="Résistance courante à l'IZAS" value="4" min="0" max="4" {% if include.readonly %}readonly{% endif %} /><p style="margin:0;">/</p>
+        <input type="number" id="player-resistance-max" title="Résistance maximum à l'IZAS" value="4" min="1" max="4" {% if include.readonly %}readonly{% endif %} />
+        
+        <img class="flipped s-icon" title="Moral" src="../img/sanity.png"/>
+        <input type="number" id="player-sanity" title="Moral courant" value="4" min="0" max="4" {% if include.readonly %}readonly{% endif %} /><p style="margin:0;">/</p>
+        <input type="number" id="player-sanity-max" title="Moral maximum" value="4" min="1" max="4"  {% if include.readonly %}readonly{% endif %} />
+    </div>
+    <div id="party-id" class="flex_row_centered">
+        <label>Index d'équipe :</label>
+        <input type="text" id="partyID" readonly/>
+        <input type="button" id="copy-partyID" value="Copier"/>
+    </div>
 </div>
