@@ -1,4 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js';
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-auth.js";
 import { getDatabase, ref, push, set, get, onValue, child, query, orderByChild, remove, increment } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js';
 import * as utils from "./utils.js";
 import { data as playerData } from "./player.js";
@@ -30,6 +31,7 @@ export class Firebase {
     
     /* Private Attributes */
     #app;
+    #connectingToDB = false;
     #db;
     #partyRef;
     #partyIntegrityUnsubscriber;
@@ -40,8 +42,28 @@ export class Firebase {
     
     constructor() {
         this.app = initializeApp(firebaseConfig);
-        this.db = getDatabase();
+        this.connectingToDB = true;
+        
+        const auth = getAuth();
+        signInAnonymously(auth);
+        
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                this.db = getDatabase();
+                this.connectingToDB = false;
+            } else if (this.connectingToDB) {
+                utils.throwError("Error when connecting to DB (" + error + ")");
+                this.db = undefined;
+                this.connectingToDB = false;
+            } else {
+                this.db = undefined;
+                this.connectingToDB = false;
+            }
+        });
     }
+    
+    async waitWhileConnectingToDB() { while (this.connectingToDB) { await new Promise(resolve => setTimeout(resolve, 500)); } }
+    isConnected() { return !!this.app && !!this.db }
     
     /* Data Creation */
     _internalCreateParty = function (createdCallback)
@@ -52,8 +74,11 @@ export class Firebase {
             utils.throwError("Error when creating new party (" + error + ")");
         });
     }
-    createParty(createdCallback)
+    async createParty(createdCallback)
     {
+        await this.waitWhileConnectingToDB();
+        if (! this.isConnected()) { return; }
+        
         var q = query(ref(this.db, partiesKey), orderByChild(timestampKey));
         get(q).then((snapshot) => {
             if (! snapshot.exists()) { console.log("Error when retrieving parties."); return; }
@@ -112,9 +137,13 @@ export class Firebase {
         this.connectingToParty = false;
     }
     isConnectedToParty() { return !!this.partyRef; } // is partyRef valid ?
-    connectToParty(_partyID) {
+    async waitWhileConnectingToParty() { while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); } }
+    async connectToParty(_partyID) {
         this.deconnectFromParty();
         this.connectingToParty = true;
+        
+        await this.waitWhileConnectingToDB();
+        if (! this.isConnected()) { this.connectingToParty = false; return; }
         
         this.partyIntegrityUnsubscriber = onValue(
             ref(this.db, partiesKey),
@@ -142,12 +171,13 @@ export class Firebase {
         this.connectingToPlayer = false;
     }
     isConnectedToPlayer() { return !!this.playerRef; } // is playerRef valid ?
+    async waitWhileConnectingToPlayer() { while (this.connectingToPlayer) { await new Promise(resolve => setTimeout(resolve, 500)); } }
     async connectToPlayer(_playerID, bCreate = false) {
         this.deconnectFromPlayer();
         this.connectingToPlayer = true;
         
-        while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
-        if (! this.isConnectedToParty()) return false;
+        await this.waitWhileConnectingToParty();
+        if (! this.isConnectedToParty()) { this.connectingToPlayer = false; return false; }
         
         var bCreated = false;
         
@@ -181,7 +211,7 @@ export class Firebase {
     // @return int
     async bindToResource(resourceName, changedCallback)
     {
-        while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+        await this.waitWhileConnectingToParty();
         if (! this.isConnectedToParty()) return undefined;
         
         return onValue(child(this.partyRef, resourcesKey + '/' + resourceName), (snapshot) => {
@@ -193,7 +223,7 @@ export class Firebase {
     // @return boolean, by default false
     async bindToOption(optionName, changedCallback)
     {
-        while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+        await this.waitWhileConnectingToParty();
         if (! this.isConnectedToParty()) return undefined;
         
         return onValue(child(this.partyRef, optionsKey + '/' + optionName), (snapshot) => {
@@ -205,7 +235,7 @@ export class Firebase {
     // @return { lat:number, lng:number }
     async bindToPegman(changedCallback)
     {
-        while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+        await this.waitWhileConnectingToParty();
         if (! this.isConnectedToParty()) return undefined;
         
         onValue(child(this.partyRef, pegmanKey), (snapshot) => {
@@ -217,7 +247,7 @@ export class Firebase {
     // @return list of all players names
     async bindToPlayerNames(changedCallback)
     {
-        while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+        await this.waitWhileConnectingToParty();
         if (! this.isConnectedToParty()) return undefined;
         
         onValue(child(this.partyRef, playersKey), (snapshot) => {
@@ -232,7 +262,7 @@ export class Firebase {
     // @return list of all players
     async bindToPlayers(changedCallback)
     {
-        while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); }
+        await this.waitWhileConnectingToParty();
         if (! this.isConnectedToParty()) return undefined;
         
         onValue(child(this.partyRef, playersKey), (snapshot) => {
@@ -245,7 +275,7 @@ export class Firebase {
     // @return { current:int, max:int }
     async bindToResistance(changedCallback)
     {
-        while (this.connectingToPlayer) { await new Promise(resolve => setTimeout(resolve, 500)); }
+        await this.waitWhileConnectingToPlayer();
         if (! this.isConnectedToPlayer()) return undefined;
 
         return onValue(child(this.playerRef, resistanceKey), (snapshot) => {
@@ -257,7 +287,7 @@ export class Firebase {
     // @return { current:int, max:int }
     async bindToSanity(changedCallback)
     {
-        while (this.connectingToPlayer) { await new Promise(resolve => setTimeout(resolve, 500)); }
+        await this.waitWhileConnectingToPlayer();
         if (! this.isConnectedToPlayer()) return undefined;
 
         return onValue(child(this.playerRef, sanityKey), (snapshot) => {
@@ -269,7 +299,7 @@ export class Firebase {
     // @return { job:string, description:string }
     async bindToJob(changedCallback)
     {
-        while (this.connectingToPlayer) { await new Promise(resolve => setTimeout(resolve, 500)); }
+        await this.waitWhileConnectingToPlayer();
         if (! this.isConnectedToPlayer()) return undefined;
 
         return onValue(child(this.playerRef, jobIDKey), (snapshot) => {
