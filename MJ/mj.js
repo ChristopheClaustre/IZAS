@@ -84,7 +84,23 @@ function initializeMJ() {
     utils.bindEvent(document.getElementById("map-allowed-control"), 'change', () => firebase.setOption('map_allowed', !!document.getElementById("map-allowed-control").checked));
     
     // display resources
-    function updateSpaceCount() { document.getElementById("space-count").value = parseInt(document.getElementById("heal-count").value) + parseInt(document.getElementById("confort-count").value) + parseInt(document.getElementById("foods-count").value); }
+    function updateSpaceCount() {
+        document.getElementById("space-count").value =
+            parseInt(document.getElementById("heal-count").value)
+            + parseInt(document.getElementById("confort-count").value)
+            + parseInt(document.getElementById("foods-count").value);
+        // update class
+        var max = document.getElementById("space-max").value;
+        var count = document.getElementById("space-count").value;
+        var ratio = max > 0 ? parseFloat(count) / max : 0;
+        if (ratio >= 1) {
+            document.getElementById("space-count").className = "error";
+        } else if (ratio >= 0.7) {
+            document.getElementById("space-count").className = "warning";
+        } else {
+            document.getElementById("space-count").className = "";
+        }
+    }
     firebase.bindToResource("heal",     (data) => { document.getElementById("heal-count").value = data;     updateSpaceCount(); } );
     firebase.bindToResource("confort",  (data) => { document.getElementById("confort-count").value = data;  updateSpaceCount(); } );
     firebase.bindToResource("foods",    (data) => { document.getElementById("foods-count").value = data;    updateSpaceCount(); } );

@@ -101,6 +101,14 @@ select[id="player-job"] {
     width: 20em;
 }
 
+input.error {
+    background-color : red; 
+}
+
+input.warning {
+    background-color : yellow;
+}
+
 /* Split.js's gutter STYLING */
 
 .gutter {
