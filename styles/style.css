@@ -143,7 +143,8 @@ input.warning {
 }
 
 #map,
-#pano {
+#pano,
+#notes {
     height: 100%;
 }
 
@@ -171,4 +172,12 @@ input.warning {
 
 #places-control{
     min-width: 300px;
+}
+
+/* NOTES STYLING */
+
+#notes-input {
+    height: 100%;
+    width: 95%;
+    resize: none;
 }

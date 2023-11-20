@@ -201,7 +201,7 @@ export class Firebase {
         return onValue(child(this.partyRef, optionsKey + '/' + optionName), (snapshot) => {
             if (! snapshot.exists()) { return changedCallback(false); }
             const data = snapshot.val();
-            changedCallback(data);
+            changedCallback(!!data);
         });
     }
     // @return { lat:number, lng:number }

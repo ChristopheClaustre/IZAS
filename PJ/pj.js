@@ -4,19 +4,36 @@ import * as utils from "../scripts/utils.js";
 import { data as playerData, randomName } from "../scripts/player.js";
 import { data as defaultData } from "../scripts/default.js";
 
-function allowMaps()
+var split_obj = undefined;
+var notesPercent = 30;
+function showMaps(mapEnabled)
 {
-    var gutter = document.querySelector(".gutter");
-    if (gutter) gutter.remove(); // remove root div for gutter
-    Split(['#map', '#pano'], { sizes: [40, 60] }); // create new gutter
-}
-
-function forbidMaps()
-{
-    var gutter = document.querySelector(".gutter");
-    if (gutter) gutter.remove(); // remove root div for gutter
-    document.getElementById("map").style.width = "0px"; // hide maps
-    Split(['#pano'], { sizes: [100] }); // create new gutter
+    if (split_obj) split_obj.destroy();
+    
+    document.getElementById("map").style.width = "0px"; // reset maps
+    
+    if (!mapEnabled) {
+        split_obj = Split(
+            ['#pano', '#notes'],
+            {
+                minSize: [200, 0],
+                snapOffset: 100,
+                sizes: [100 - notesPercent, notesPercent],
+                onDragEnd: function (sizes) { notesPercent = sizes[1] }
+            }
+        ); // create new gutter
+    }
+    else {
+        split_obj = Split(
+            ['#map', '#pano', '#notes'],
+            {
+                minSize: [0, 200, 0],
+                snapOffset: 100,
+                sizes: [30, 100 - notesPercent, notesPercent],
+                onDragEnd: function (sizes) { notesPercent = sizes[2] }
+            }
+        ); // create new gutter
+    }
 }
 
 function initializePJ() {
@@ -50,7 +67,7 @@ function initializePJ() {
         motionTracking: false,
         motionTrackingControl: false
     });
-    forbidMaps(); // by default, hidden
+    showMaps(false, 20); // by default, map is hidden
     
     // Disable movement with keyboard
     window.addEventListener(
@@ -89,7 +106,7 @@ function initializePJ() {
     panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(dice_control);
     
     // display options
-    firebase.bindToOption("map_allowed", (allowed) => { if (allowed) allowMaps(); else forbidMaps(); });
+    firebase.bindToOption("map_allowed", (allowed) => { showMaps(allowed, 20); });
     
     // display resources
     function updateSpaceCount() {
