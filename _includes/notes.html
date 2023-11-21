@@ -1,5 +1,31 @@
-<div id="notes">
-    <div class="flex_column_centered" style="overflow:hidden">
+<div id="notes" style="overflow:hidden">
+    <div id="player-info" class="flex_wrap_centered">
+        <div class="flex_row_centered">
+            <p id="players-resume">{{ include.player_label }}</p>
+            <select id="player-name" {% if include.readonly %}disabled{% endif %}></select>
+        </div>
+        <div class="flex_row_centered">
+            <p>Job : </p>
+            <select id="player-job" {% if include.readonly %}disabled{% endif %} ></select>
+        </div>
+        <div class="flex_row_centered">
+            <img class="flipped s-icon" title="Résistance à l'IZAS" src="../img/header.png"/>
+            <input type="number" id="player-resistance" title="Résistance courante à l'IZAS" value="4" min="0" max="4" {% if include.readonly %}readonly{% endif %} /><p style="margin:0;">/</p>
+            <input type="number" id="player-resistance-max" title="Résistance maximum à l'IZAS" value="4" min="1" max="4" {% if include.readonly %}readonly{% endif %} />
+        </div>
+        <div class="flex_row_centered">
+            <img class="flipped s-icon" title="Moral" src="../img/sanity.png"/>
+            <input type="number" id="player-sanity" title="Moral courant" value="4" min="0" max="4" {% if include.readonly %}readonly{% endif %} /><p style="margin:0;">/</p>
+            <input type="number" id="player-sanity-max" title="Moral maximum" value="4" min="1" max="4"  {% if include.readonly %}readonly{% endif %} />
+        </div>
+        {% unless include.readonly %}
+        <div class="flex_row_centered">
+            <input id="player-map-allowed" type="checkbox"/>
+            <label for="player-map-allowed">Map allowed</label>
+        </div>
+        {% endunless %}
+    </div>
+    <div class="flex_column_centered">
         <label for="notes-input">Notes:</label>
         <textarea autocomplete="off" id="notes-input" name="notes-input" maxlength="1024" rows="25"></textarea>
     </div>

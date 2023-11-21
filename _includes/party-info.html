@@ -10,18 +10,6 @@
         <input id="space-count" type="number" title="Emplacement(s) disponible de l'équipe" value="0" min="0" max="50" readonly /><p style="margin:0;">/</p>
         <input id="space-max" type="number" title="Emplacement(s) disponible de l'équipe" value="0" min="0" max="50" {% if include.readonly %}readonly{% endif %} />
     </div>
-    <div id="player-info" class="flex_row_centered">
-        <p id="players-resume">{{ include.player_label }}</p>
-        <select id="player-name" {% if include.readonly %}disabled{% endif %}></select>
-        <select id="player-job" {% if include.readonly %}disabled{% endif %} ></select>
-        <img class="flipped s-icon" title="Résistance à l'IZAS" src="../img/header.png"/>
-        <input type="number" id="player-resistance" title="Résistance courante à l'IZAS" value="4" min="0" max="4" {% if include.readonly %}readonly{% endif %} /><p style="margin:0;">/</p>
-        <input type="number" id="player-resistance-max" title="Résistance maximum à l'IZAS" value="4" min="1" max="4" {% if include.readonly %}readonly{% endif %} />
-        
-        <img class="flipped s-icon" title="Moral" src="../img/sanity.png"/>
-        <input type="number" id="player-sanity" title="Moral courant" value="4" min="0" max="4" {% if include.readonly %}readonly{% endif %} /><p style="margin:0;">/</p>
-        <input type="number" id="player-sanity-max" title="Moral maximum" value="4" min="1" max="4"  {% if include.readonly %}readonly{% endif %} />
-    </div>
     <div id="party-id" class="flex_row_centered">
         <label>Index d'équipe :</label>
         <input type="text" id="partyID" readonly/>

@@ -30,13 +30,18 @@ function initializeMJ() {
         }
     );
     map.setStreetView(panorama);
-    Split(['#map', '#pano'], { sizes: [40, 60] }); // MJ have always access to maps
+    Split(
+        ['#map', '#pano', '#notes'],
+        {
+            minSize: [0, 200, 0],
+            snapOffset: 100,
+            sizes: [30, 70, 30]
+        }
+    ); // create gutter
     
     // Setup specific controls
     const maps_control = document.getElementById("maps-control");
     map.controls[google.maps.ControlPosition.TOP_CENTER].push(maps_control);
-    const options_control = document.getElementById("options-control");
-    map.controls[google.maps.ControlPosition.LEFT_CENTER].push(options_control);
     
     // Setup search box
     const placesControl = document.getElementById("places-control");
@@ -78,10 +83,10 @@ function initializeMJ() {
     });
     
     // display options
-    firebase.bindToOption("map_allowed", (allowed) => document.getElementById("map-allowed-control").checked = allowed );
+    firebase.bindToOption("map_allowed", (allowed) => document.getElementById("player-map-allowed").checked = allowed);
     
     // check/uncheck options
-    utils.bindEvent(document.getElementById("map-allowed-control"), 'change', () => firebase.setOption('map_allowed', !!document.getElementById("map-allowed-control").checked));
+    utils.bindEvent(document.getElementById("player-map-allowed"), 'change', () => firebase.setOption('map_allowed', !!document.getElementById("player-map-allowed").checked));
     
     // display resources
     function updateSpaceCount() {

@@ -72,6 +72,13 @@ h1, h2{
     align-items: center;
 }
 
+.flex_wrap_centered {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
 /* INPUT STYLING */
 
 input[readonly] {
@@ -98,7 +105,7 @@ select {
 }
 
 select[id="player-job"] {
-    width: 20em;
+    width: 18em;
 }
 
 input.error {
@@ -180,4 +187,13 @@ input.warning {
     height: 100%;
     width: 95%;
     resize: none;
+}
+
+#notes > * {
+    margin-top: 10px;
+}
+
+#player-info > * {
+    height: 25px;
+    white-space:nowrap
 }
