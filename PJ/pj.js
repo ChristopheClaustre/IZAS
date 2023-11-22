@@ -149,6 +149,20 @@ function initializePJ() {
         document.getElementById("player-job").innerHTML = "<option>" + data.job + "</option>";
         document.getElementById("player-job").title = data.job + " :\n" + data.description;
     });
+    
+    // Player Notes
+    var maxLength = 2048;
+	var textArea = document.getElementById("notes-input");
+	textArea.maxLength = maxLength.toString();
+    firebase.bindToPlayerNotes((notes) => {
+        textArea.value = notes;
+        document.getElementById("notes-current-count").innerHTML = notes.length;
+    });
+	utils.bindEvent(textArea, "input", () => {
+		document.getElementById("notes-current-count").innerHTML = textArea.value.length;
+        firebase.setPlayerNotes( playerID, textArea.value );
+	});
+	document.getElementById("notes-max-count").innerHTML = maxLength;
 }
 
 function main(partyID, playerID) {

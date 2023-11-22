@@ -224,6 +224,20 @@ function initializeMJ() {
         resume.trim();
         document.getElementById("players-resume").title = resume;
     });
+    
+    // Master Notes
+    var maxLength = 2048;
+	var textArea = document.getElementById("notes-input");
+	textArea.maxLength = maxLength.toString();
+    firebase.bindToMasterNotes((notes) => {
+        textArea.value = notes;
+        document.getElementById("notes-current-count").innerHTML = notes.length;
+    });
+	utils.bindEvent(textArea, "input", () => {
+		document.getElementById("notes-current-count").innerHTML = textArea.value.length;
+        firebase.setMasterNotes( textArea.value );
+	});
+	document.getElementById("notes-max-count").innerHTML = maxLength;
 }
 
 function main(partyID) {

@@ -20,6 +20,7 @@ const partiesKey = "parties";
 const resourcesKey = "resources";
 const optionsKey = "options";
 const pegmanKey = "pegman";
+const notesKey = "notes";
 const timestampKey = "timestamp";
 const playersKey = "players";
 const resistanceKey = "resistance";
@@ -216,6 +217,18 @@ export class Firebase {
             changedCallback(data);
         });
     }
+    // @return string[1024]
+    async bindToMasterNotes(changedCallback)
+    {
+        await this.waitWhileConnectingToParty();
+        if (! this.isConnectedToParty()) return undefined;
+        
+        onValue(child(this.partyRef, notesKey), (snapshot) => {
+            if (! snapshot.exists()) { console.log("Error while retrieving master notes from party '" + this.partyRef.key + "'."); return; }
+            const data = snapshot.val();
+            changedCallback(data);
+        });
+    }
     // @return list of all players names
     async bindToPlayerNames(changedCallback)
     {
@@ -280,6 +293,18 @@ export class Firebase {
             changedCallback(data);
         });
     }
+    // @return string[1024]
+    async bindToPlayerNotes(changedCallback)
+    {
+        await this.waitWhileConnectingToPlayer();
+        if (! this.isConnectedToPlayer()) return undefined;
+        
+        return onValue(child(this.playerRef, notesKey), (snapshot) => {
+            if (! snapshot.exists()) { console.log("Error while retrieving notes from player '" + this.playerRef.key + "'."); return; }
+            const data = snapshot.val();
+            changedCallback(data);
+        });
+    }
 
     /* Getter - party */
     getPlayer(playerID, getCallback)
@@ -318,11 +343,29 @@ export class Firebase {
         });
         this._internalUpdateTimestamp();
     }
+    setMasterNotes(newValue)
+    {
+        if (! this.isConnectedToParty()) return;
+        set(child(this.partyRef, notesKey), newValue).catch((error) => {
+            utils.throwError("Error when updating master notes (" + error + ")");
+        });
+        this._internalUpdateTimestamp();
+    }
+    
+    /* Setter - player */
     setPlayerAttribute(playerID, attributeName, newValue)
     {
         if (! this.isConnectedToParty()) return;
         set(child(this.partyRef, playersKey + '/' + playerID + '/' + attributeName), newValue).catch((error) => {
             utils.throwError("Error when updating " + attributeName + " for player \"" + playerID + "\" (" + error + ")");
+        });
+        this._internalUpdateTimestamp();
+    }
+    setPlayerNotes(playerID, newValue)
+    {
+        if (! this.isConnectedToParty()) return;
+        set(child(this.partyRef, playersKey + '/' + playerID + '/' + notesKey), newValue).catch((error) => {
+            utils.throwError("Error when updating notes for player \"" + playerID + "\" (" + error + ")");
         });
         this._internalUpdateTimestamp();
     }

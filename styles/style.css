@@ -27,6 +27,22 @@ h1, h2{
     font-weight: 400;
 }
 
+.hint {
+    color: grey;
+    font-size: smaller;
+    margin: 0;
+    margin-top: -22px;
+    margin-right: 50px;
+    padding: 0;
+    height: 20px;
+}
+
+.hint > * {
+    background-color: white;
+    margin: 0;
+    padding: 0;
+}
+
 /* ICON STYLING */
 
 .l-icon {
@@ -63,6 +79,12 @@ h1, h2{
 .flex_row_centered * {
     margin-left: 5px;
     margin-right: 5px;
+}
+
+.flex_row_right {
+    display:flex;
+    flex-direction: row;
+    justify-content: flex-end;
 }
 
 .flex_column_centered {
