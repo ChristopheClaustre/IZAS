@@ -281,6 +281,18 @@ export class Firebase {
             changedCallback(data);
         });
     }
+    // @return boolean, by default false
+    async bindToPlayerOption(optionName, changedCallback)
+    {
+        await this.waitWhileConnectingToParty();
+        if (! this.isConnectedToParty()) return undefined;
+        
+        return onValue(child(this.playerRef, optionsKey + '/' + optionName), (snapshot) => {
+            if (! snapshot.exists()) { return changedCallback(false); }
+            const data = snapshot.val();
+            changedCallback(!!data);
+        });
+    }
     // @return { job:string, description:string }
     async bindToJob(changedCallback)
     {
@@ -366,6 +378,14 @@ export class Firebase {
         if (! this.isConnectedToParty()) return;
         set(child(this.partyRef, playersKey + '/' + playerID + '/' + notesKey), newValue).catch((error) => {
             utils.throwError("Error when updating notes for player \"" + playerID + "\" (" + error + ")");
+        });
+        this._internalUpdateTimestamp();
+    }
+    setPlayerOption(playerID, optionName, newValue)
+    {
+        if (! this.isConnectedToParty()) return;
+        set(child(this.partyRef, playersKey + '/' + playerID + '/' + optionsKey + '/' + optionName), newValue).catch((error) => {
+            utils.throwError("Error when updating " + optionName + " for player \"" + playerID + "\" (" + error + ")");
         });
         this._internalUpdateTimestamp();
     }

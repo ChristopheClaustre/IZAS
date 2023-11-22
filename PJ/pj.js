@@ -106,7 +106,7 @@ function initializePJ() {
     panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(dice_control);
     
     // display options
-    firebase.bindToOption("map_allowed", (allowed) => { showMaps(allowed, 20); });
+    firebase.bindToPlayerOption("map_allowed", (allowed) => { showMaps(allowed, 20); });
     
     // display resources
     function updateSpaceCount() {

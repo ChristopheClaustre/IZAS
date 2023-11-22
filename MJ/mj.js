@@ -132,6 +132,8 @@ function initializeMJ() {
                 document.getElementById("player-sanity").max = player.sanity.max;
                 document.getElementById("player-sanity").value = player.sanity.current;
                 document.getElementById("player-sanity-max").value = player.sanity.max;
+                // Map allowed
+                document.getElementById("player-map-allowed").checked = player.options.map_allowed;
             });
         }
         else {
@@ -189,6 +191,7 @@ function initializeMJ() {
             firebase.setPlayerAttribute(selectedPlayer, 'sanity/max', sanityMax);
         }
     });
+    utils.bindEvent(document.getElementById("player-map-allowed"), 'change', () => firebase.setPlayerOption(selectedPlayer, 'map_allowed', !!document.getElementById("player-map-allowed").checked));
     utils.bindEvent(document.getElementById("player-name"), 'change', onPlayerChanged);
     
     // fill select for jobs
