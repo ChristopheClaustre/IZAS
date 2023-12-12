@@ -99,14 +99,11 @@ function initializePJ() {
     document.getElementById("player-name").innerHTML = "<option>" + playerID + "</option>";
     
     // Synchronize position with firebase
-    firebase.bindToPegman((pegman) => panorama.setPosition(pegman));
+    firebase.parties[partyID].pegmanAttr.addChangedListener((pegman) => panorama.setPosition(pegman));
     
     // Setup specific controls
     const dice_control = document.getElementById("dice-control");
     panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(dice_control);
-    
-    // display options
-    firebase.bindToPlayerOption("map_allowed", (allowed) => { showMaps(allowed, 20); });
     
     // display resources
     function updateSpaceCount() {
@@ -119,7 +116,7 @@ function initializePJ() {
         var max = document.getElementById("space-max").value;
         var count = document.getElementById("space-count").value;
         var ratio = max > 0 ? parseFloat(count) / max : 0;
-        if (ratio >= 1) {
+        if (ratio > 1) {
             document.getElementById("space-count").className = "error";
         } else if (ratio >= 0.7) {
             document.getElementById("space-count").className = "warning";
@@ -127,85 +124,92 @@ function initializePJ() {
             document.getElementById("space-count").className = "";
         }
     }
-    firebase.bindToResource("heal",     (data) => { document.getElementById("heal-count").value = data;     updateSpaceCount(); } );
-    firebase.bindToResource("confort",  (data) => { document.getElementById("confort-count").value = data;  updateSpaceCount(); } );
-    firebase.bindToResource("foods",    (data) => { document.getElementById("foods-count").value = data;    updateSpaceCount(); } );
-    firebase.bindToResource("space",    (data) => { document.getElementById("space-max").value = data;      updateSpaceCount(); } );
+    firebase.parties[partyID].healAttr.addChangedListener(    (data) => { document.getElementById("heal-count").value = data;     updateSpaceCount(); } );
+    firebase.parties[partyID].confortAttr.addChangedListener( (data) => { document.getElementById("confort-count").value = data;  updateSpaceCount(); } );
+    firebase.parties[partyID].foodsAttr.addChangedListener(   (data) => { document.getElementById("foods-count").value = data;    updateSpaceCount(); } );
+    firebase.parties[partyID].spaceAttr.addChangedListener(   (data) => { document.getElementById("space-max").value = data;      updateSpaceCount(); } );
 
     // display resistance
-    firebase.bindToResistance((data) => {
-        document.getElementById("player-resistance").value = data.current;
-        document.getElementById("player-resistance-max").value = data.max;
-    });
+    firebase.parties[partyID].players[playerID].resistanceAttr.current.addChangedListener((data) => { document.getElementById("player-resistance").value = data; });
+    firebase.parties[partyID].players[playerID].resistanceAttr.max.addChangedListener((data) => { document.getElementById("player-resistance-max").value = data; });
 
     // display sanity
-    firebase.bindToSanity((data) => {
-        document.getElementById("player-sanity").value = data.current;
-        document.getElementById("player-sanity-max").value = data.max;
-    });
+    firebase.parties[partyID].players[playerID].sanityAttr.current.addChangedListener((data) => { document.getElementById("player-sanity").value = data; });
+    firebase.parties[partyID].players[playerID].sanityAttr.max.addChangedListener((data) => { document.getElementById("player-sanity-max").value = data; });
 
     // display job
-    firebase.bindToJob((data) => {
-        document.getElementById("player-job").innerHTML = "<option>" + data.job + "</option>";
-        document.getElementById("player-job").title = data.job + " :\n" + data.description;
+    firebase.parties[partyID].players[playerID].jobIDAttr.addChangedListener((jobID) => {
+        document.getElementById("player-job").innerHTML = "<option>" + playerData.jobsList[jobID].job + "</option>";
+        document.getElementById("player-job").title = playerData.jobsList[jobID].job + " :\n" + playerData.jobsList[jobID].description;
     });
     
-    // Player Notes
+    // display notes
     var maxLength = 2048;
 	var textArea = document.getElementById("notes-input");
 	textArea.maxLength = maxLength.toString();
-    firebase.bindToPlayerNotes((notes) => {
+    firebase.parties[partyID].players[playerID].notesAttr.addChangedListener((notes) => {
         textArea.value = notes;
         document.getElementById("notes-current-count").innerHTML = notes.length;
     });
 	utils.bindEvent(textArea, "input", () => {
-		document.getElementById("notes-current-count").innerHTML = textArea.value.length;
-        firebase.setPlayerNotes( playerID, textArea.value );
+        document.getElementById("notes-current-count").innerHTML = textArea.value.length;
+        firebase.parties[partyID].players[playerID].notesAttr.set( textArea.value );
 	});
 	document.getElementById("notes-max-count").innerHTML = maxLength;
+    
+    // display options
+    firebase.parties[partyID].players[playerID].optionsAttr.addChangedListener((options) => { showMaps(options["map_allowed"]); });
 }
 
-function main(partyID, playerID) {
+async function main() {
     // Display partyID
     document.getElementById("partyID").value = partyID;
     utils.bindEvent(document.getElementById("copy-partyID"), 'click', () => navigator.clipboard.writeText(partyID));
     
-    // Connect to party
-    firebase.connectToParty(partyID);
     // Connect as player
-    firebase.connectToPlayer(playerID, true);
-
+    await firebase.parties[partyID].connectToPlayer(playerID);
+    
     // Initialize for maps
     registerInitialize(initializePJ);
 }
 
-// Connect to firebase
-var firebase = new Firebase();
-
-// Manage query string (and retrieve party ID if possible)
-const urlParams = new URLSearchParams(window.location.search);
-var partyID = urlParams.get("partyID", "");
-var playerID = urlParams.get("playerID", "");
-
-// Check partyID
-if ( ! partyID )
+try
 {
-    utils.throwError("No Party ID set.");
-}
+    // Connect to firebase
+    var firebase = new Firebase();
 
-// Check player's name
-if ( ! playerID )
-{
-    while(!playerID) {
-        playerID = window.prompt("Entrez le nom de votre personage (press cancel for another randomn name) :", randomName());
+    // Manage query string (and retrieve party ID if possible)
+    const urlParams = new URLSearchParams(window.location.search);
+    var partyID = urlParams.get("partyID", "");
+    var playerID = urlParams.get("playerID", "");
+
+    // Check partyID
+    if ( ! partyID )
+    {
+        utils.throwError("No Party ID set.");
     }
-    console.log("Selected playerID: " + playerID)
-    await firebase.createPlayer(partyID, playerID, () => {
-        utils.updateURL(utils.updateURLParameter(window.location.href, "playerID", playerID));
-        main(partyID, playerID);
-    });
+
+    // Connect to party
+    await firebase.connectToParty(partyID);
+
+    // Check player's name
+    if ( ! playerID )
+    {
+        while(!playerID) {
+            playerID = window.prompt("Entrez le nom de votre personage (press cancel for another randomn name) :", randomName());
+        }
+        console.log("Selected playerID: " + playerID)
+        firebase.parties[partyID].createPlayer(playerID, () => {
+            utils.updateURL(utils.updateURLParameter(window.location.href, "playerID", playerID));
+            main();
+        });
+    }
+    else
+    {
+        main();
+    }
 }
-else
+catch (error)
 {
-    main(partyID, playerID);
+    utils.throwError("Error when creating new party (" + error + ")");
 }

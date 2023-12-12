@@ -16,72 +16,207 @@ const firebaseConfig = {
 };
 
 // Keys
-const partiesKey = "parties";
-const resourcesKey = "resources";
-const optionsKey = "options";
-const pegmanKey = "pegman";
-const notesKey = "notes";
-const timestampKey = "timestamp";
-const playersKey = "players";
-const resistanceKey = "resistance";
-const sanityKey = "sanity";
-const jobIDKey = "jobID";
+const cPartiesKey = "parties";
+const cResourcesKey = "resources";
+const cOptionsKey = "options";
+const cPegmanKey = "pegman";
+const cNotesKey = "notes";
+const cTimestampKey = "timestamp";
+const cPlayersKey = "players";
+const cResistanceKey = "resistance";
+const cSanityKey = "sanity";
+const cJobIDKey = "jobID";
 
 export class Firebase {
+    _app;
+    _db;
     
-    /* Private Attributes */
-    #app;
-    #db;
-    #partyRef;
-    #partyIntegrityUnsubscriber;
-    #connectingToParty = false;
-    #playerRef;
-    #playerIntegrityUnsubscriber;
-    #connectingToPlayer = false;
+    parties = {};
     
     constructor() {
-        this.app = initializeApp(firebaseConfig);
-        this.db = getDatabase();
+        this._app = initializeApp(firebaseConfig);
+        this._db = getDatabase();
     }
     
-    /* Data Creation */
-    _internalCreateParty = function (createdCallback)
+    #internalCreateParty(createdCallback)
     {
-        push(ref(this.db, partiesKey + '/'), {pegman: defaultData.pegman, resources: defaultData.resources, timestamp: Date.now()}).then((snapshot) => {
+        push(ref(this._db, cPartiesKey + '/'), {pegman: defaultData.pegman, resources: defaultData.resources, timestamp: Date.now(), notes: "", players: {}}).then((snapshot) => {
             createdCallback(snapshot.key);
         }).catch((error) => {
-            utils.throwError("Error when creating new party (" + error + ")");
+            throw new Error("Error when creating new party ({0})".format(error));
         });
     }
     createParty(createdCallback)
     {
-        var q = query(ref(this.db, partiesKey), orderByChild(timestampKey));
+        var q = query(ref(this._db, cPartiesKey), orderByChild(cTimestampKey));
         get(q).then((snapshot) => {
             if (! snapshot.exists()) { console.log("Error when retrieving parties."); return; }
             // Retrieve parties
             const partiesData = snapshot.val();
-            var partiesKeys = Object.keys(partiesData);
-            var partiesCount = partiesKeys.length;
+            var cPartiesKeys = Object.keys(partiesData);
+            var partiesCount = cPartiesKeys.length;
             var i = 0;
             while (i < partiesCount && partiesCount - i > 9) { // We preserve the last 10 parties
-                var removedKey = partiesKeys[i];
+                var removedKey = cPartiesKeys[i];
                 var removedTimestamp = new Date(partiesData[removedKey].timestamp);
                 if (Date.now() - removedTimestamp < (1000 * 60 * 60 * 1))
                 { // We preserve the parties last updated earlier than 1 hour ago
-                    utils.throwError("Too much parties at the same time.");
-                    return; // Early quit
+                    throw new Error("Too much parties at the same time.");
                 };
-                console.log("Remove party: " + removedKey);
-                remove(ref(this.db, partiesKey + "/" + removedKey));
+                console.log("Remove party: '{0}'.".format(removedKey));
+                remove(ref(this._db, cPartiesKey + "/" + removedKey));
                 i++;
             }
             // Create effectively the party
             this._internalCreateParty(createdCallback);
-        }).catch((error) => {
-            utils.throwError("Error when retrieving parties (" + error + ")");
-        });
+        }).catch((error) => { throw new Error("Error when retrieving parties ({0})".format(error)); });
     }
-    createPlayer(_partyID, _playerID, createdCallback)
+    
+    async connectToParty(partyID, _bRetrieveAllPlayers = false) {
+        if (Object.keys(this.parties).includes(partyID)) return;
+        this.parties[partyID] = new Party(this, partyID, _bRetrieveAllPlayers);
+        await this.parties[partyID].connect();
+    }
+}
+
+class FirebaseElement {
+    #changedListeners;
+    
+    _parentElement;
+    _reference;
+
+    constructor(_parentElement) {
+        if (this.constructor == FirebaseElement) {
+            throw new Error("Abstract classes can't be instantiated.");
+        }
+        this._parentElement = _parentElement;
+        this.#changedListeners = [];
+    }
+
+    name() { return this._reference.key; }
+    
+    // changed listener management
+    addChangedListener(_changedCallback) {
+        this.#changedListeners.push(_changedCallback);
+    }
+    callChangedListeners(param) {
+        this.#changedListeners.forEach(elem => { elem(param); });
+    }
+}
+
+class FirebaseConnectable extends FirebaseElement {
+    _connecting = 0;
+    
+    constructor(_parentElement) {
+        super(_parentElement);
+        if (this.constructor == FirebaseConnectable) {
+            throw new Error("Abstract classes can't be instantiated.");
+        }
+    }
+    
+    // Connection management
+    isConnected() { return !!this._reference; }; // Is reference valid ?
+    async waitWhileConnecting() { while (this._connecting) { await new Promise(resolve => setTimeout(resolve, 500)); } }
+    async _internalConnect() { throw new Error("internalConnect not implemented yet."); }
+    async connect() {
+        if (this._connecting) { throw new Error("Already connecting."); }
+        this._connecting = 1;
+        console.log("Connecting {0}...".format(this.constructor.name));
+        
+        this._internalConnect();
+        await this.waitWhileConnecting();
+        
+        console.log("{0} connected!".format(this.constructor.name));
+    }
+    
+    _oneMoreChildConnection() { this._connecting++; }
+    _oneLessChildConnection() {
+        this._connecting--;
+        if (this._connecting<0)
+            throw new Error("Error: Negative count of connection in progress.");
+    }
+}
+
+export class Party extends FirebaseConnectable {
+    _firebase;
+    _partyID;
+    _bRetrieveAllPlayers = false;
+    
+    // party attributes
+    pegmanAttr;
+    confortAttr;
+    foodsAttr;
+    healAttr;
+    spaceAttr;
+    notesAttr;
+    
+    playerNames;
+    players = {};
+    
+    constructor(_firebase, _partyID, _bRetrieveAllPlayers = false) {
+        super(undefined);
+        this._firebase = _firebase;
+        this._partyID = _partyID;
+        this._bRetrieveAllPlayers = _bRetrieveAllPlayers;
+    }
+    
+    // Connection management
+    async _internalConnect() {
+        onValue(
+            ref(this._firebase._db, cPartiesKey),
+            (snapshot) => {
+                if (! snapshot.exists()) { throw new Error("{0} '{1}' doesn't exist anymore.".format(this.constructor.name, this._partyID)); }
+                var found = false;
+                snapshot.forEach(child => found = found || child.key == this._partyID);
+                if (found) {
+                    if (! this.isConnected()) {
+                        this._reference = ref(this._firebase._db, cPartiesKey + '/' + this._partyID);
+                        this.#internalBinding();
+                        this._connecting--;
+                    }
+                }
+                else {
+                    throw new Error("{0} '{1}' doesn't exist anymore.".format(this.constructor.name, this._partyID));
+                }
+            },
+            { shallow:true } // Get only children keys
+        );
+    }
+    async #internalBinding() {
+        // Create FirebaseAttribute
+        this.pegmanAttr = new FirebaseAttribute(this, defaultData.pegman);
+        this.confortAttr = new FirebaseAttribute(this, 0);
+        this.foodsAttr = new FirebaseAttribute(this, 0);
+        this.healAttr = new FirebaseAttribute(this, 0);
+        this.spaceAttr = new FirebaseAttribute(this, 0);
+        this.notesAttr = new FirebaseAttribute(this, "");
+        this.playerNames = new FirebaseAttribute(this, {});
+        
+        // bind to database
+        this.pegmanAttr._bindToReference(child(this._reference, cPegmanKey));
+        this.confortAttr._bindToReference(child(this._reference, cResourcesKey + "/confort"));
+        this.foodsAttr._bindToReference(child(this._reference, cResourcesKey + "/foods"));
+        this.healAttr._bindToReference(child(this._reference, cResourcesKey + "/heal"));
+        this.spaceAttr._bindToReference(child(this._reference, cResourcesKey + "/space"));
+        this.notesAttr._bindToReference(child(this._reference, cNotesKey));
+        this.playerNames._bindToReference(child(this._reference, cPlayersKey), true, false);
+        
+        // connect all players
+        if (this._bRetrieveAllPlayers) {
+            this.playerNames.addChangedListener( (value) => {
+                if (this._bRetrieveAllPlayers) {
+                    const names = Object.keys(value);
+                    names.forEach((playerID) => {
+                        if (! Object.keys(this.players).includes(playerID)) {
+                            this.connectToPlayer(playerID);
+                        }
+                    });
+                }
+            });
+        }
+    }
+    
+    createPlayer(_playerID, createdCallback)
     {
         var player = defaultData.player;
         var resistance = 1 + utils.getRandomInt(3);
@@ -93,85 +228,64 @@ export class Firebase {
         player.jobID = utils.getRandomInt(playerData.jobsList.length);
         
         // Create player
-        set(ref(this.db, partiesKey + '/' + _partyID + '/' + playersKey + '/' + _playerID), player).then((snapshot) => {
+        set(child(this._reference, cPlayersKey + '/' + _playerID), player).then((snapshot) => {
             createdCallback();
             this._internalUpdateTimestamp();
-        }).catch((error) => {
-            utils.throwError("Error when creating new player (" + error + ")");
-        });
+        }).catch((error) => { throw new Error("Error when creating new player ({0}).".format(error)); });
         
         // Increment party's space by 3
-        set(ref(this.db, partiesKey + '/' + _partyID + '/' + resourcesKey + '/' + 'space'), increment(3)).catch((error) => {
-            utils.throwError("Error when updating space (" + error + ")");
+        set(ref(this._firebase._db, cPartiesKey + '/' + this._partyID + '/' + cResourcesKey + '/' + 'space'), increment(3)).catch((error) => {
+            throw new Error("Error when updating space from {0} '{1}' ({2})".format(this.constructor.name, this.name(), error));
         });
     }
     
-    /* Party management */
-    deconnectFromParty() {
-        if (this.partyIntegrityUnsubscriber) this.partyIntegrityUnsubscriber(); // unsubscribe binded onValue (@see connectToParty)
-        this.partyRef = undefined;
-        this.connectingToParty = false;
-    }
-    isConnectedToParty() { return !!this.partyRef; } // is partyRef valid ?
-    async waitWhileConnectingToParty() { while (this.connectingToParty) { await new Promise(resolve => setTimeout(resolve, 500)); } }
-    connectToParty(_partyID) {
-        this.deconnectFromParty();
-        this.connectingToParty = true;
-        
-        this.partyIntegrityUnsubscriber = onValue(
-            ref(this.db, partiesKey),
-            (snapshot) => {
-                this.partyRef = undefined;
-                if (! snapshot.exists()) { utils.throwError("Party '" + _partyID + "' doesn't exist anymore."); return; }
-                var found = false;
-                snapshot.forEach(child => found = found || child.key == _partyID);
-                if (found) {
-                    this.partyRef = ref(this.db, partiesKey + '/' + _partyID);
-                    this.connectingToParty = false;
-                }
-                else {
-                    utils.throwError("Party '" + _partyID + "' doesn't exist anymore.");
-                }
-            },
-            { shallow:true } // Get only children keys
-        );
+    async connectToPlayer(playerID) {
+        if (Object.keys(this.players).includes(playerID)) return;
+        this.players[playerID] = new Player(this, playerID);
+        await this.players[playerID].connect();
     }
     
-    /* Player management */
-    deconnectFromPlayer() {
-        if (this.playerIntegrityUnsubscriber) this.playerIntegrityUnsubscriber(); // unsubscribe binded onValue (@see connectToPlayer)
-        this.playerRef = undefined;
-        this.connectingToPlayer = false;
+    /* private function */
+    _internalUpdateTimestamp()
+    {
+        if (! this.isConnected()) return;
+        set(child(this._reference, cTimestampKey), Date.now()).catch((error) => { console.log("Error when updating timestamp ({0})".format(error)); });
     }
-    isConnectedToPlayer() { return !!this.playerRef; } // is playerRef valid ?
-    async waitWhileConnectingToPlayer() { while (this.connectingToPlayer) { await new Promise(resolve => setTimeout(resolve, 500)); } }
-    async connectToPlayer(_playerID, bCreate = false) {
-        this.deconnectFromPlayer();
-        this.connectingToPlayer = true;
-        
-        await this.waitWhileConnectingToParty();
-        if (! this.isConnectedToParty()) { this.connectingToPlayer = false; return false; }
-        
-        var bCreated = false;
-        
-        this.playerIntegrityUnsubscriber = onValue(
-            child(this.partyRef, playersKey),
+}
+
+export class Player extends FirebaseConnectable {
+    _playerID;
+    
+    // player attributes
+    sanityAttr;
+    resistanceAttr;
+    jobIDAttr;
+    notesAttr;
+    optionsAttr;
+    
+    constructor(_party, _playerID) {
+        super(_party);
+        this._playerID = _playerID;
+    }
+    
+    // Connection management
+    async _internalConnect() {
+        onValue(
+            child(this._parentElement._reference, cPlayersKey),
             (snapshot) => {
-                if (! snapshot.exists() && (!bCreate || bCreated)) { utils.throwError("Error while retrieving players of party ID '" + this.partyRef.key + "'."); return; }
+                if (! snapshot.exists()) { throw new Error("Error while retrieving {0} of {1} '{2}'.".format(cPlayersKey, this.constructor.name, this._parentElement.name())); }
                 var found = false;
-                snapshot.forEach(child => found = found || child.key == _playerID);
+                snapshot.forEach(child => found = found || child.key == this._playerID);
                 if (found) {
-                    this.playerRef = child(this.partyRef, playersKey + "/" + _playerID);
-                    this.connectingToPlayer = false;
-                }
-                else if (bCreate && ! bCreated)
-                {
-                    this.createPlayer(this.partyRef.key, _playerID, () => {});
-                    bCreated = true;
+                    if (! this.isConnected()) {
+                        this._reference = child(this._parentElement._reference, cPlayersKey + "/" + this._playerID);
+                        this.#internalBinding();
+                        this._connecting--;
+                    }
                 }
                 else
                 {
-                    utils.throwError("Player '" + _playerID + "' doesn't exist anymore.");
+                    throw new Error("{0} '{1}' doesn't exist anymore.".format(this.constructor.name, this._playerID));
                 }
             },
             { shallow:true } // Get only children keys
@@ -179,223 +293,93 @@ export class Firebase {
         
         return true;
     }
+    async #internalBinding() {
+        // Create FirebaseAttribute
+        this.sanityAttr = new FirebaseMaxedAttribute(this, 4, 4);
+        this.resistanceAttr = new FirebaseMaxedAttribute(this, 4, 4);
+        this.jobIDAttr = new FirebaseAttribute(this, 1);
+        this.notesAttr = new FirebaseAttribute(this, "");
+        this.optionsAttr = new FirebaseAttribute(this, { "map_allowed" : false });
+        
+        // Bind to database
+        this.sanityAttr._bindToReference(child(this._reference, cSanityKey));
+        this.resistanceAttr._bindToReference(child(this._reference, cResistanceKey));
+        this.jobIDAttr._bindToReference(child(this._reference, cJobIDKey));
+        this.notesAttr._bindToReference(child(this._reference, cNotesKey));
+        this.optionsAttr._bindToReference(child(this._reference, cOptionsKey));
+    }
+}
+
+export class FirebaseAttribute extends FirebaseElement {
+    _value;
+    _bound;
     
-    /* Bound - party */
-    // @return int
-    async bindToResource(resourceName, changedCallback)
-    {
-        await this.waitWhileConnectingToParty();
-        if (! this.isConnectedToParty()) return undefined;
+    constructor(_parentElement, defaultValue) {
+        super(_parentElement);
+        this._value = defaultValue;
         
-        return onValue(child(this.partyRef, resourcesKey + '/' + resourceName), (snapshot) => {
-            if (! snapshot.exists()) console.log("Error while retrieving resource '" + resourceName + "'.");
-            const data = snapshot.val();
-            changedCallback(data);
-        });
+        this._parentElement._oneMoreChildConnection();
+        this._bound = false;
     }
-    // @return boolean, by default false
-    async bindToOption(optionName, changedCallback)
-    {
-        await this.waitWhileConnectingToParty();
-        if (! this.isConnectedToParty()) return undefined;
+
+    // Listener management
+    async _bindToReference(_reference, _shallow = false, _mustExists = true) {
+        this._reference = _reference;
         
-        return onValue(child(this.partyRef, optionsKey + '/' + optionName), (snapshot) => {
-            if (! snapshot.exists()) { return changedCallback(false); }
-            const data = snapshot.val();
-            changedCallback(!!data);
-        });
-    }
-    // @return { lat:number, lng:number }
-    async bindToPegman(changedCallback)
-    {
-        await this.waitWhileConnectingToParty();
-        if (! this.isConnectedToParty()) return undefined;
-        
-        onValue(child(this.partyRef, pegmanKey), (snapshot) => {
-            if (! snapshot.exists()) { console.log("Error while retrieving pegman from party '" + this.partyRef.key + "'."); return; }
-            const data = snapshot.val();
-            changedCallback(data);
-        });
-    }
-    // @return string[1024]
-    async bindToMasterNotes(changedCallback)
-    {
-        await this.waitWhileConnectingToParty();
-        if (! this.isConnectedToParty()) return undefined;
-        
-        onValue(child(this.partyRef, notesKey), (snapshot) => {
-            if (! snapshot.exists()) { console.log("Error while retrieving master notes from party '" + this.partyRef.key + "'."); return; }
-            const data = snapshot.val();
-            changedCallback(data);
-        });
-    }
-    // @return list of all players names
-    async bindToPlayerNames(changedCallback)
-    {
-        await this.waitWhileConnectingToParty();
-        if (! this.isConnectedToParty()) return undefined;
-        
-        onValue(child(this.partyRef, playersKey), (snapshot) => {
-                if (! snapshot.exists()) { changedCallback([]); return; }
-                var players = [];
-                snapshot.forEach(child => { players.push(child.key) });
-                changedCallback(players);
-            },
-            { shallow:true }
+        onValue(this._reference, (snapshot) => {
+                if (! snapshot.exists()) {
+                    console.log("Error while retrieving '{0}' from '{1}'.".format(this.name(), this._parentElement.name()));
+                    return;
+                }
+                if (this._bound == false) { this._bound = true; this._parentElement._oneLessChildConnection(); }
+                this._value = snapshot.val();
+                this.callChangedListeners(this._value);
+            }, { shallow:_shallow } // Get only children keys
         );
     }
-    // @return list of all players
-    async bindToPlayers(changedCallback)
-    {
-        await this.waitWhileConnectingToParty();
-        if (! this.isConnectedToParty()) return undefined;
+    addChangedListener(_changedCallback) {
+        _changedCallback(this._value);
+        super.addChangedListener(_changedCallback);
+    }
+    
+    // Getter/Setter
+    get() { return this._value; }
+    set(newValue) {
+        if (! this._parentElement.isConnected()) return;
+        set(this._reference, newValue).catch((error) => { throw new Error("Error when updating '{0}' for '{1}' ({2})".format(this.name(), this._parentElement.name(), error)); });
         
-        onValue(child(this.partyRef, playersKey), (snapshot) => {
-            if (! snapshot.exists()) { changedCallback({}); return; }
-            changedCallback(snapshot.val());
-        });
+        // update timestamp
+        var parentElem = this._parentElement;
+        while (parentElem) {
+            if (typeof parentElem._internalUpdateTimestamp === "function") {
+                parentElem._internalUpdateTimestamp();
+                break;
+            }
+            parentElem = parentElem._parentElement;
+        }
+    }
+}
+
+export class FirebaseMaxedAttribute extends FirebaseElement {
+    current;
+    max;
+    
+    constructor(_parentElement, _defaultCurrent, _defaultMax) {
+        super(_parentElement);
+        this.current = new FirebaseAttribute(this, _defaultCurrent);
+        this.max = new FirebaseAttribute(this, _defaultMax);
     }
     
-    /* Bound - player */
-    // @return { current:int, max:int }
-    async bindToResistance(changedCallback)
-    {
-        await this.waitWhileConnectingToPlayer();
-        if (! this.isConnectedToPlayer()) return undefined;
-
-        return onValue(child(this.playerRef, resistanceKey), (snapshot) => {
-            if (! snapshot.exists()) { console.log("Error while retrieving resistance from player '" + this.playerRef.key + "'."); return; }
-            const data = snapshot.val();
-            changedCallback(data);
-        });
-    }
-    // @return { current:int, max:int }
-    async bindToSanity(changedCallback)
-    {
-        await this.waitWhileConnectingToPlayer();
-        if (! this.isConnectedToPlayer()) return undefined;
-
-        return onValue(child(this.playerRef, sanityKey), (snapshot) => {
-            if (! snapshot.exists()) { console.log("Error while retrieving sanity from player '" + this.playerRef.key + "'."); return; }
-            const data = snapshot.val();
-            changedCallback(data);
-        });
-    }
-    // @return boolean, by default false
-    async bindToPlayerOption(optionName, changedCallback)
-    {
-        await this.waitWhileConnectingToParty();
-        if (! this.isConnectedToParty()) return undefined;
-        
-        return onValue(child(this.playerRef, optionsKey + '/' + optionName), (snapshot) => {
-            if (! snapshot.exists()) { return changedCallback(false); }
-            const data = snapshot.val();
-            changedCallback(!!data);
-        });
-    }
-    // @return { job:string, description:string }
-    async bindToJob(changedCallback)
-    {
-        await this.waitWhileConnectingToPlayer();
-        if (! this.isConnectedToPlayer()) return undefined;
-
-        return onValue(child(this.playerRef, jobIDKey), (snapshot) => {
-            if (! snapshot.exists()) { console.log("Error while retrieving jobID from player '" + this.playerRef.key + "'."); return; }
-            const data = playerData.jobsList[snapshot.val()];
-            changedCallback(data);
-        });
-    }
-    // @return string[1024]
-    async bindToPlayerNotes(changedCallback)
-    {
-        await this.waitWhileConnectingToPlayer();
-        if (! this.isConnectedToPlayer()) return undefined;
-        
-        return onValue(child(this.playerRef, notesKey), (snapshot) => {
-            if (! snapshot.exists()) { console.log("Error while retrieving notes from player '" + this.playerRef.key + "'."); return; }
-            const data = snapshot.val();
-            changedCallback(data);
-        });
-    }
-
-    /* Getter - party */
-    getPlayer(playerID, getCallback)
-    {
-        get(child(this.partyRef, playersKey + '/' + playerID)).then((snapshot) => {
-            if (! snapshot.exists()) { console.log("Error when retrieving player \"" + playerID + "\"."); return; }
-            const data = snapshot.val();
-            getCallback(data);
-        }).catch((error) => {
-            utils.throwError("Error when retrieving player '" + playerID + "' from party '" + partyID + "' (" + error + ")");
-        });
+    async _bindToReference(_reference) {
+        this._reference = _reference;
+        await this.current._bindToReference(child(_reference, "current"));
+        await this.max._bindToReference(child(_reference, "max"));
     }
     
-    /* Setter - party */
-    setResource(resourceName, newValue)
-    {
-        if (! this.isConnectedToParty()) return;
-        set(child(this.partyRef, resourcesKey + '/' + resourceName), newValue).catch((error) => {
-            utils.throwError("Error when updating " + resourceName + " (" + error + ")");
-        });
-        this._internalUpdateTimestamp();
-    }
-    setOption(optionName, newValue)
-    {
-        if (! this.isConnectedToParty()) return;
-        set(child(this.partyRef, optionsKey + '/' + optionName), newValue).catch((error) => {
-            utils.throwError("Error when updating " + optionName + " (" + error + ")");
-        });
-        this._internalUpdateTimestamp();
-    }
-    setPegman(newValue)
-    {
-        if (! this.isConnectedToParty()) return;
-        set(child(this.partyRef, pegmanKey), newValue).catch((error) => {
-            utils.throwError("Error when updating pegman (" + error + ")");
-        });
-        this._internalUpdateTimestamp();
-    }
-    setMasterNotes(newValue)
-    {
-        if (! this.isConnectedToParty()) return;
-        set(child(this.partyRef, notesKey), newValue).catch((error) => {
-            utils.throwError("Error when updating master notes (" + error + ")");
-        });
-        this._internalUpdateTimestamp();
-    }
+    name() { return this._reference.parent.key + "/" + this._reference.key; }
     
-    /* Setter - player */
-    setPlayerAttribute(playerID, attributeName, newValue)
-    {
-        if (! this.isConnectedToParty()) return;
-        set(child(this.partyRef, playersKey + '/' + playerID + '/' + attributeName), newValue).catch((error) => {
-            utils.throwError("Error when updating " + attributeName + " for player \"" + playerID + "\" (" + error + ")");
-        });
-        this._internalUpdateTimestamp();
-    }
-    setPlayerNotes(playerID, newValue)
-    {
-        if (! this.isConnectedToParty()) return;
-        set(child(this.partyRef, playersKey + '/' + playerID + '/' + notesKey), newValue).catch((error) => {
-            utils.throwError("Error when updating notes for player \"" + playerID + "\" (" + error + ")");
-        });
-        this._internalUpdateTimestamp();
-    }
-    setPlayerOption(playerID, optionName, newValue)
-    {
-        if (! this.isConnectedToParty()) return;
-        set(child(this.partyRef, playersKey + '/' + playerID + '/' + optionsKey + '/' + optionName), newValue).catch((error) => {
-            utils.throwError("Error when updating " + optionName + " for player \"" + playerID + "\" (" + error + ")");
-        });
-        this._internalUpdateTimestamp();
-    }
-    
-    /* private function */
-    _internalUpdateTimestamp()
-    {
-        if (! this.isConnectedToParty()) return;
-        set(child(this.partyRef, timestampKey), Date.now()).catch((error) => {
-            console.log("Error when updating timestamp (" + error + ")");
-        });
-    }
+    async waitWhileConnecting() { await this._parentElement.waitWhileConnecting(); }
+    isConnected() { return this._parentElement.isConnected(); }
+    _oneMoreChildConnection() { this._parentElement._oneMoreChildConnection(); }
+    _oneLessChildConnection() { this._parentElement._oneLessChildConnection(); }
 }
