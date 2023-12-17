@@ -328,10 +328,11 @@ export class FirebaseAttribute extends FirebaseElement {
         
         onValue(this._reference, (snapshot) => {
                 if (! snapshot.exists()) {
-                    console.log("Error while retrieving '{0}' from '{1}'.".format(this.name(), this._parentElement.name()));
+                    if (_mustExists) { console.log("Error while retrieving '{0}' from '{1}'.".format(this.name(), this._parentElement.name())); }
+                    else if (! this._bound) { this._bound = true; this._parentElement._oneLessChildConnection(); }
                     return;
                 }
-                if (this._bound == false) { this._bound = true; this._parentElement._oneLessChildConnection(); }
+                if (! this._bound) { this._bound = true; this._parentElement._oneLessChildConnection(); }
                 this._value = snapshot.val();
                 this.callChangedListeners(this._value);
             }, { shallow:_shallow } // Get only children keys
