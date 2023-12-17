@@ -1,14 +1,14 @@
 <div id="party-info" class="flex_row_sbetween">
     <div id="party-resources" class="flex_row_centered">
         <img src="../img/heal.png" class="s-icon" title="Kit(s) de soin de l'équipe"/>
-        <input id="heal-count" type="number" title="Kit(s) de soin de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly{% else %}size="3"{% endif %} />
+        <input id="heal-count" type="number" title="Kit(s) de soin de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly size="1"{% else %}size="3"{% endif %} />
         <img src="../img/confort.png" class="s-icon" title="Kit(s) de confort de l'équipe"/>
-        <input id="confort-count" type="number" title="Kit(s) de confort de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly{% else %}size="3"{% endif %} />
+        <input id="confort-count" type="number" title="Kit(s) de confort de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly size="1"{% else %}size="3"{% endif %} />
         <img src="../img/foods.png" class="s-icon" title="Ration(s) de nourriture de l'équipe"/>
-        <input id="foods-count" type="number" title="Ration(s) de nourriture de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly{% else %}size="3"{% endif %} />
+        <input id="foods-count" type="number" title="Ration(s) de nourriture de l'équipe" value="0" min="0" max="9" {% if include.readonly %}readonly size="1"{% else %}size="3"{% endif %} />
         <img src="../img/space.png" class="s-icon" title="Emplacement(s) disponible de l'équipe"/>
-        <input id="space-count" type="number" title="Emplacement(s) disponible de l'équipe" value="0" min="0" max="30" size="3" readonly /><p style="margin:0;">/</p>
-        <input id="space-max" type="number" title="Emplacement(s) disponible de l'équipe" value="0" min="0" max="30" size="4" {% if include.readonly %}readonly{% else %}size="3"{% endif %} />
+        <input id="space-count" type="number" title="Emplacement(s) disponible de l'équipe" value="0" min="0" max="30" size="2" readonly /><p style="margin:0;">/</p>
+        <input id="space-max" type="number" title="Emplacement(s) disponible de l'équipe" value="0" min="0" max="30" {% if include.readonly %}readonly size="2"{% else %}size="4"{% endif %} />
     </div>
     <div id="party-id" class="flex_row_centered">
         <label>Index d'équipe :</label>

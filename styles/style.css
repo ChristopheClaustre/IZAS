@@ -114,6 +114,7 @@ input[type=number] {
     text-align: center;
 }
 
+input[type=number][size=1] { width: 1em; }
 input[type=number][size=2] { width: 2em; }
 input[type=number][size=3] { width: 3em; }
 input[type=number][size=4] { width: 4em; }
