@@ -101,10 +101,6 @@ function initializePJ() {
     // Synchronize position with firebase
     firebase.parties[partyID].pegmanAttr.addChangedListener((pegman) => panorama.setPosition(pegman));
     
-    // Setup specific controls
-    const dice_control = document.getElementById("dice-control");
-    panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(dice_control);
-    
     // display resources
     function updateSpaceCount() {
         // Update count
