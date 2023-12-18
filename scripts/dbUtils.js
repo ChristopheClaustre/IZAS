@@ -21,6 +21,7 @@ const cResourcesKey = "resources";
 const cOptionsKey = "options";
 const cPegmanKey = "pegman";
 const cNotesKey = "notes";
+const cDiceKey = "diceHistory";
 const cTimestampKey = "timestamp";
 const cPlayersKey = "players";
 const cResistanceKey = "resistance";
@@ -148,6 +149,7 @@ export class Party extends FirebaseConnectable {
     foodsAttr;
     healAttr;
     spaceAttr;
+    diceAttr;
     notesAttr;
     
     playerNames;
@@ -189,6 +191,7 @@ export class Party extends FirebaseConnectable {
         this.foodsAttr = new FirebaseAttribute(this, 0);
         this.healAttr = new FirebaseAttribute(this, 0);
         this.spaceAttr = new FirebaseAttribute(this, 0);
+        this.diceAttr = new FirebaseAttribute(this, []);
         this.notesAttr = new FirebaseAttribute(this, "");
         this.playerNames = new FirebaseAttribute(this, {});
         
@@ -198,6 +201,7 @@ export class Party extends FirebaseConnectable {
         this.foodsAttr._bindToReference(child(this._reference, cResourcesKey + "/foods"));
         this.healAttr._bindToReference(child(this._reference, cResourcesKey + "/heal"));
         this.spaceAttr._bindToReference(child(this._reference, cResourcesKey + "/space"));
+        this.diceAttr._bindToReference(child(this._reference, cDiceKey), false, false);
         this.notesAttr._bindToReference(child(this._reference, cNotesKey));
         this.playerNames._bindToReference(child(this._reference, cPlayersKey), true, false);
         

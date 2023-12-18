@@ -242,6 +242,17 @@ function initializeMJ() {
         firebase.parties[partyID].notesAttr.set( textArea.value );
 	});
 	document.getElementById("notes-max-count").innerHTML = maxLength;
+    
+    // dice history
+    firebase.parties[partyID].diceAttr.addChangedListener((diceHistory) => {
+        var diceHistoryStr = "";
+        diceHistory.forEach(history => {
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+            const date = new Date(history.timestamp);
+            diceHistoryStr += history.playerID + " " + history.result + "/" + history.max + " " + date.toLocaleDateString("fr-FR", options) + "\n";
+        });
+        document.getElementById("dice-history").innerHTML = diceHistoryStr;
+    });
 }
 
 async function main() {

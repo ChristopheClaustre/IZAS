@@ -3,6 +3,7 @@ import * as mapUtils from "../scripts/mapUtils.js";
 import * as utils from "../scripts/utils.js";
 import { data as playerData, randomName } from "../scripts/player.js";
 import { data as defaultData } from "../scripts/default.js";
+import { Die, RollDie } from "../scripts/die.js";
 
 var split_obj = undefined;
 var notesPercent = 30;
@@ -155,6 +156,31 @@ function initializePJ() {
     
     // display options
     firebase.parties[partyID].players[playerID].optionsAttr.addChangedListener((options) => { showMaps(options["map_allowed"]); });
+    
+    // dice history
+    document.getElementById("current-die").innerHTML = Die(1);
+    utils.bindEvent(document.getElementById("roll-die"), "click", async () => {
+        // roll die
+        let max = document.getElementById("die-max").value;
+        let value = await RollDie(document.getElementById("current-die"), max, 1500, 100);
+        
+        // add to history
+        let diceHistory = firebase.parties[partyID].diceAttr.get();
+        diceHistory.unshift({ playerID:playerID, result:value, max:max, timestamp:Date.now() });
+        firebase.parties[partyID].diceAttr.set(diceHistory);
+    });
+    firebase.parties[partyID].diceAttr.addChangedListener((diceHistory) => {
+        var diceHistoryStr = "";
+        diceHistory.forEach(history => {
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+            const date = new Date(history.timestamp);
+            if (history.playerID == playerID)
+                diceHistoryStr += history.playerID + " " + history.result + "/" + history.max + " " + date.toLocaleDateString("fr-FR", options) + "\n";
+            else
+                diceHistoryStr += history.playerID + " " + history.result + "/? " + date.toLocaleDateString("fr-FR", options) + "\n";
+        });
+        document.getElementById("dice-history").value = diceHistoryStr;
+    });
 }
 
 async function main() {

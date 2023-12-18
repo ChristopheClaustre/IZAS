@@ -81,6 +81,11 @@ h1, h2{
     margin-right: 5px;
 }
 
+.flex_row_left {
+    display:flex;
+    flex-direction: row;
+}
+
 .flex_row_right {
     display:flex;
     flex-direction: row;
@@ -215,11 +220,23 @@ input.warning {
     resize: none;
 }
 
-#notes > * {
-    margin-top: 10px;
-}
-
 #player-info > * {
     height: 25px;
     white-space:nowrap
+}
+
+#dice-history-parent {
+    overflow: auto;
+    flex-grow:1;
+    resize: none;
+}
+
+#dice-history {
+    width:95%;
+    flex-grow:1;
+    resize: none;
+}
+
+#notes > * {
+    margin-top: 10px;
 }
