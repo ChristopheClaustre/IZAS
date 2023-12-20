@@ -18,6 +18,18 @@
             <input type="number" id="player-sanity" title="Moral courant" value="4" min="0" max="4" {% if include.readonly %}readonly size="1"{% else %}size="3"{% endif %} /><p style="margin:0;">/</p>
             <input type="number" id="player-sanity-max" title="Moral maximum" value="4" min="1" max="4"  {% if include.readonly %}readonly size="1"{% else %}size="3"{% endif %} />
         </div>
+        <div class="flex_row_centered">
+            <img class="flipped s-icon" title="Physique" src="../img/attr_physical.svg"/>
+            <input type="number" id="player-physical" title="Physique" value="50" min="0" max="99" {% if include.readonly %}readonly size="2"{% else %}size="4"{% endif %} />
+        </div>
+        <div class="flex_row_centered">
+            <img class="flipped s-icon" title="Social" src="../img/attr_social.svg"/>
+            <input type="number" id="player-social" title="Social" value="50" min="0" max="99" {% if include.readonly %}readonly size="2"{% else %}size="4"{% endif %} />
+        </div>
+        <div class="flex_row_centered">
+            <img class="flipped s-icon" title="Mental" src="../img/attr_mental.svg"/>
+            <input type="number" id="player-mental" title="Mental" value="50" min="0" max="99" {% if include.readonly %}readonly size="2"{% else %}size="4"{% endif %} />
+        </div>
         {% unless include.readonly %}
         <div class="flex_row_centered">
             <input id="player-map-allowed" type="checkbox"/>

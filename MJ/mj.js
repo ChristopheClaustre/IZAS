@@ -119,6 +119,10 @@ function initializeMJ() {
             document.getElementById("player-sanity").max = firebase.parties[partyID].players[selectedPlayer].sanityAttr.max.get();
             document.getElementById("player-sanity").value = firebase.parties[partyID].players[selectedPlayer].sanityAttr.current.get();
             document.getElementById("player-sanity-max").value = firebase.parties[partyID].players[selectedPlayer].sanityAttr.max.get();
+            // Physical / Social / Mental
+            document.getElementById("player-physical").value = firebase.parties[partyID].players[selectedPlayer].physicalAttr.get();
+            document.getElementById("player-social").value = firebase.parties[partyID].players[selectedPlayer].socialAttr.get();
+            document.getElementById("player-mental").value = firebase.parties[partyID].players[selectedPlayer].mentalAttr.get();
             // Map allowed
             document.getElementById("player-map-allowed").checked = firebase.parties[partyID].players[selectedPlayer].optionsAttr.get()["map_allowed"];
         }
@@ -132,6 +136,10 @@ function initializeMJ() {
             document.getElementById("player-sanity").max = 4;
             document.getElementById("player-sanity").value = 4;
             document.getElementById("player-sanity-max").value = 4;
+            // Physical / Social / Mental
+            document.getElementById("player-physical").value = 50;
+            document.getElementById("player-social").value = 50;
+            document.getElementById("player-mental").value = 50;
         }
     };
     utils.bindEvent(document.getElementById("player-job"), 'change', () => {
@@ -177,6 +185,21 @@ function initializeMJ() {
             firebase.parties[partyID].players[selectedPlayer].sanityAttr.max.set(sanityMax);
         }
     });
+    utils.bindEvent(document.getElementById("player-physical"), 'change', () => {
+        if (selectedPlayer) {
+            firebase.parties[partyID].players[selectedPlayer].physicalAttr.set(parseInt(document.getElementById("player-physical").value));
+        }
+    });
+    utils.bindEvent(document.getElementById("player-social"), 'change', () => {
+        if (selectedPlayer) {
+            firebase.parties[partyID].players[selectedPlayer].socialAttr.set(parseInt(document.getElementById("player-social").value));
+        }
+    });
+    utils.bindEvent(document.getElementById("player-mental"), 'change', () => {
+        if (selectedPlayer) {
+            firebase.parties[partyID].players[selectedPlayer].mentalAttr.set(parseInt(document.getElementById("player-mental").value));
+        }
+    });
     utils.bindEvent(document.getElementById("player-map-allowed"), 'change', () => {
         var options = firebase.parties[partyID].players[selectedPlayer].optionsAttr.get();
         options.map_allowed = !!document.getElementById("player-map-allowed").checked;
@@ -217,6 +240,8 @@ function initializeMJ() {
             resume += playerID +
                 " (IZAS: " + firebase.parties[partyID].players[playerID].resistanceAttr.current.get() + "/" + firebase.parties[partyID].players[playerID].resistanceAttr.max.get() +
                 ", Sanity: " + firebase.parties[partyID].players[playerID].sanityAttr.current.get() + "/" + firebase.parties[partyID].players[playerID].sanityAttr.max.get() +
+                ", Physical: " + firebase.parties[partyID].players[playerID].physicalAttr.get() + ", Social: " + firebase.parties[partyID].players[playerID].socialAttr.get() + 
+                ", Mental: " + firebase.parties[partyID].players[playerID].mentalAttr.get() + 
                 ") : " + playerData.jobsList[firebase.parties[partyID].players[playerID].jobIDAttr.get()].job + "\n"
         });
         resume.trim();

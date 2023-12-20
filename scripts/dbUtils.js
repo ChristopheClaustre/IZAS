@@ -26,6 +26,9 @@ const cTimestampKey = "timestamp";
 const cPlayersKey = "players";
 const cResistanceKey = "resistance";
 const cSanityKey = "sanity";
+const cPhysicalKey = "physical";
+const cSocialKey = "social";
+const cMentalKey = "mental";
 const cJobIDKey = "jobID";
 
 export class Firebase {
@@ -229,6 +232,9 @@ export class Party extends FirebaseConnectable {
         player.resistance.max = resistance;
         player.sanity.current = sanity;
         player.sanity.max = sanity;
+        player.physical = (3 + utils.getRandomInt(12) ) * 5; // [15;75]
+        player.social = (3 + utils.getRandomInt(12) ) * 5;   // [15;75]
+        player.mental = 170 - player.physical - player.social;
         player.jobID = utils.getRandomInt(playerData.jobsList.length);
         
         // Create player
@@ -263,6 +269,9 @@ export class Player extends FirebaseConnectable {
     // player attributes
     sanityAttr;
     resistanceAttr;
+    physicalAttr;
+    socialAttr;
+    mentalAttr;
     jobIDAttr;
     notesAttr;
     optionsAttr;
@@ -301,6 +310,9 @@ export class Player extends FirebaseConnectable {
         // Create FirebaseAttribute
         this.sanityAttr = new FirebaseMaxedAttribute(this, 4, 4);
         this.resistanceAttr = new FirebaseMaxedAttribute(this, 4, 4);
+        this.physicalAttr = new FirebaseAttribute(this, 50);
+        this.socialAttr = new FirebaseAttribute(this, 50);
+        this.mentalAttr = new FirebaseAttribute(this, 50);
         this.jobIDAttr = new FirebaseAttribute(this, 1);
         this.notesAttr = new FirebaseAttribute(this, "");
         this.optionsAttr = new FirebaseAttribute(this, { "map_allowed" : false });
@@ -308,6 +320,9 @@ export class Player extends FirebaseConnectable {
         // Bind to database
         this.sanityAttr._bindToReference(child(this._reference, cSanityKey));
         this.resistanceAttr._bindToReference(child(this._reference, cResistanceKey));
+        this.physicalAttr._bindToReference(child(this._reference, cPhysicalKey));
+        this.socialAttr._bindToReference(child(this._reference, cSocialKey));
+        this.mentalAttr._bindToReference(child(this._reference, cMentalKey));
         this.jobIDAttr._bindToReference(child(this._reference, cJobIDKey));
         this.notesAttr._bindToReference(child(this._reference, cNotesKey));
         this.optionsAttr._bindToReference(child(this._reference, cOptionsKey));
