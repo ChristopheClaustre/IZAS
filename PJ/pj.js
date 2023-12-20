@@ -1,4 +1,4 @@
-import { Firebase } from "../scripts/dbUtils.js";
+import { Firebase, BindInputToAttribute } from "../scripts/dbUtils.js";
 import * as mapUtils from "../scripts/mapUtils.js";
 import * as utils from "../scripts/utils.js";
 import { data as playerData, randomName } from "../scripts/player.js";
@@ -121,19 +121,24 @@ function initializePJ() {
             document.getElementById("space-count").className = "";
         }
     }
-    firebase.parties[partyID].healAttr.addChangedListener(    (data) => { document.getElementById("heal-count").value = data;     updateSpaceCount(); } );
-    firebase.parties[partyID].confortAttr.addChangedListener( (data) => { document.getElementById("confort-count").value = data;  updateSpaceCount(); } );
-    firebase.parties[partyID].foodsAttr.addChangedListener(   (data) => { document.getElementById("foods-count").value = data;    updateSpaceCount(); } );
-    firebase.parties[partyID].spaceAttr.addChangedListener(   (data) => { document.getElementById("space-max").value = data;      updateSpaceCount(); } );
+    BindInputToAttribute(document.getElementById("heal-count"), firebase.parties[partyID].healAttr, updateSpaceCount);
+    BindInputToAttribute(document.getElementById("confort-count"), firebase.parties[partyID].confortAttr, updateSpaceCount);
+    BindInputToAttribute(document.getElementById("foods-count"), firebase.parties[partyID].foodsAttr, updateSpaceCount);
+    BindInputToAttribute(document.getElementById("space-max"), firebase.parties[partyID].spaceAttr, updateSpaceCount);
 
     // display resistance
-    firebase.parties[partyID].players[playerID].resistanceAttr.current.addChangedListener((data) => { document.getElementById("player-resistance").value = data; });
-    firebase.parties[partyID].players[playerID].resistanceAttr.max.addChangedListener((data) => { document.getElementById("player-resistance-max").value = data; });
-
+    BindInputToAttribute(document.getElementById("player-resistance"), firebase.parties[partyID].players[playerID].resistanceAttr.current);
+    BindInputToAttribute(document.getElementById("player-resistance-max"), firebase.parties[partyID].players[playerID].resistanceAttr.max);
+    
     // display sanity
-    firebase.parties[partyID].players[playerID].sanityAttr.current.addChangedListener((data) => { document.getElementById("player-sanity").value = data; });
-    firebase.parties[partyID].players[playerID].sanityAttr.max.addChangedListener((data) => { document.getElementById("player-sanity-max").value = data; });
-
+    BindInputToAttribute(document.getElementById("player-sanity"), firebase.parties[partyID].players[playerID].sanityAttr.current);
+    BindInputToAttribute(document.getElementById("player-sanity-max"), firebase.parties[partyID].players[playerID].sanityAttr.max);
+    
+    // display Physical / Social / Mental
+    BindInputToAttribute(document.getElementById("player-physical"), firebase.parties[partyID].players[playerID].physicalAttr);
+    BindInputToAttribute(document.getElementById("player-social"), firebase.parties[partyID].players[playerID].socialAttr);
+    BindInputToAttribute(document.getElementById("player-mental"), firebase.parties[partyID].players[playerID].mentalAttr);
+    
     // display job
     firebase.parties[partyID].players[playerID].jobIDAttr.addChangedListener((jobID) => {
         document.getElementById("player-job").innerHTML = "<option>" + playerData.jobsList[jobID].job + "</option>";

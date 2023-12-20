@@ -388,3 +388,9 @@ export class FirebaseMaxedAttribute extends FirebaseElement {
     _oneMoreChildConnection() { this._parentElement._oneMoreChildConnection(); }
     _oneLessChildConnection() { this._parentElement._oneLessChildConnection(); }
 }
+
+export function BindInputToAttribute(_input, _attribute, _callback = () => {})
+{
+    if (_input.readonly == false) utils.bindEvent(_input, 'change', () => _attribute.set(parseInt(_attribute.value)));
+    _attribute.addChangedListener( (data) => { _input.value = data; _callback(); } );
+}

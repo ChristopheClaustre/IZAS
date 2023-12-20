@@ -1,4 +1,4 @@
-import { Firebase } from "../scripts/dbUtils.js";
+import { Firebase, BindInputToAttribute } from "../scripts/dbUtils.js";
 import * as utils from "../scripts/utils.js";
 import { data as playerData, randomName } from "../scripts/player.js";
 import { data as defaultData } from "../scripts/default.js";
@@ -100,16 +100,10 @@ function initializeMJ() {
             document.getElementById("space-count").className = "";
         }
     }
-    firebase.parties[partyID].healAttr.addChangedListener(    (data) => { document.getElementById("heal-count").value = data;     updateSpaceCount(); } );
-    firebase.parties[partyID].confortAttr.addChangedListener( (data) => { document.getElementById("confort-count").value = data;  updateSpaceCount(); } );
-    firebase.parties[partyID].foodsAttr.addChangedListener(   (data) => { document.getElementById("foods-count").value = data;    updateSpaceCount(); } );
-    firebase.parties[partyID].spaceAttr.addChangedListener(   (data) => { document.getElementById("space-max").value = data;      updateSpaceCount(); } );
-
-    // +/- resources
-    utils.bindEvent(document.getElementById("heal-count"), 'change',    () => firebase.parties[partyID].healAttr.set(parseInt(document.getElementById("heal-count").value)));
-    utils.bindEvent(document.getElementById("confort-count"), 'change', () => firebase.parties[partyID].confortAttr.set(parseInt(document.getElementById("confort-count").value)));
-    utils.bindEvent(document.getElementById("foods-count"), 'change',   () => firebase.parties[partyID].foodsAttr.set(parseInt(document.getElementById("foods-count").value)));
-    utils.bindEvent(document.getElementById("space-max"), 'change',     () => firebase.parties[partyID].spaceAttr.set(parseInt(document.getElementById("space-max").value)));
+    BindInputToAttribute(document.getElementById("heal-count"), firebase.parties[partyID].healAttr, updateSpaceCount);
+    BindInputToAttribute(document.getElementById("confort-count"), firebase.parties[partyID].confortAttr, updateSpaceCount);
+    BindInputToAttribute(document.getElementById("foods-count"), firebase.parties[partyID].foodsAttr, updateSpaceCount);
+    BindInputToAttribute(document.getElementById("space-max"), firebase.parties[partyID].spaceAttr, updateSpaceCount);
 
     // bind callback for player edition
     var selectedPlayer = "";
