@@ -406,6 +406,6 @@ export class FirebaseMaxedAttribute extends FirebaseElement {
 
 export function BindInputToAttribute(_input, _attribute, _callback = () => {})
 {
-    if (_input.readonly == false) utils.bindEvent(_input, 'change', () => _attribute.set(parseInt(_attribute.value)));
+    if (!_input.readonly) utils.bindEvent(_input, 'change', () => _attribute.set(parseInt(_input.value)));
     _attribute.addChangedListener( (data) => { _input.value = data; _callback(); } );
 }
