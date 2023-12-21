@@ -72,8 +72,8 @@ export class Firebase {
                 i++;
             }
             // Create effectively the party
-            this._internalCreateParty(createdCallback);
-        }).catch((error) => { throw new Error("Error when retrieving parties ({0})".format(error)); });
+            this.#internalCreateParty(createdCallback);
+        }).catch((error) => { throw new Error("Error when retrieving parties: " + error + "."); });
     }
     
     async connectToParty(partyID, _bRetrieveAllPlayers = false) {
