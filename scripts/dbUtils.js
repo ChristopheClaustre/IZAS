@@ -54,9 +54,9 @@ export class Firebase {
     {
         var q = query(ref(this._db, cPartiesKey), orderByChild(cTimestampKey));
         get(q).then((snapshot) => {
-            if (! snapshot.exists()) { console.log("Error when retrieving parties."); return; }
+            let partiesData = []
+            if (snapshot.exists()) { partiesData = snapshot.val(); }
             // Retrieve parties
-            const partiesData = snapshot.val();
             var cPartiesKeys = Object.keys(partiesData);
             var partiesCount = cPartiesKeys.length;
             var i = 0;
