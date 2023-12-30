@@ -1,0 +1,26 @@
+<div class="flex_row_centered" style="margin-left: 5px; margin-right: 5px; .flex_row_centered * { margin: 0px; }">
+    <img class="s-icon" title="{{ include.title | default:'Physique' }}" src="{{ include.img | default:'../img/attr_physical.svg' }}"/>
+    {% assign maximum= include.maximum | default:99 | plus:0 %}
+    <input type="number" id="player-{{ include.id | default:'physical' }}" title="{{ include.title | default:'Physique' }}"
+        value="{{ include.value | default:50 }}" min="0" max="{{ maximum }}"
+        {% if include.readonly %}
+            readonly {% if maximum < 10 %}size="1"{% elsif maximum < 100 %}size="2"{% else %}size="3"{% endif %}
+        {% else %}
+            {% if maximum < 10 %}size="3"{% elsif maximum < 100 %}size="4"{% else %}size="5"{% endif %}
+        {% endif %}
+        />
+    {% assign total= include.total | default:100 | plus:0 %}
+    {% if total == 100 and include.readonly_total or include.readonly %}
+        <p style="margin:0;">%</p>
+    {% else %}
+        <p style="margin:0;">/</p>
+        <input type="number" id="player-{{ include.id | default:'physical' }}-max" title="{{ include.title | default:'Physique' }} maximum"
+            value="{{ total }}" min="1" max="{{ total }}"
+            {% if include.readonly_total or include.readonly %}
+                readonly {% if total < 10 %}size="1"{% elsif total < 100 %}size="2"{% else %}size="3"{% endif %}
+            {% else %}
+                {% if total < 10 %}size="3"{% elsif total < 100 %}size="4"{% else %}size="5"{% endif %}
+            {% endif %}
+            />
+    {% endif %}
+</div>

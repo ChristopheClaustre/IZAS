@@ -17,10 +17,10 @@ title: IZAS - Joueur
   <body>
     {% include header.html title=page.title %}
     {% include party-info.html player_label="Vous :" readonly=true %}
-    <div id="maps">
+    <div id="contents">
       <div id="map"></div>
       <div id="pano"></div>
-      {% include notes.html player_label="Vous :" readonly=true %}
+      {% include right-panel.html player_label="Vous :" readonly=true %}
     </div>
 
     <!--

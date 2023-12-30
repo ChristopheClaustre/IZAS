@@ -173,7 +173,7 @@ input.warning {
     margin: 0.5%;
 }
 
-#maps {
+#contents {
     display: flex;
     flex-direction: row;
     height: 87%;
@@ -182,7 +182,7 @@ input.warning {
 
 #map,
 #pano,
-#notes {
+#right-panel {
     height: 100%;
 }
 
@@ -212,7 +212,11 @@ input.warning {
     min-width: 300px;
 }
 
-/* NOTES STYLING */
+/* RIGHT-PANEL STYLING */
+
+#right-panel > * {
+    margin-top: 10px;
+}
 
 #notes-input {
     height: 100%;
@@ -235,8 +239,4 @@ input.warning {
     width:95%;
     flex-grow:1;
     resize: none;
-}
-
-#notes > * {
-    margin-top: 10px;
 }

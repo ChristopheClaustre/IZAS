@@ -1,0 +1,48 @@
+<div id="right-panel" style="overflow:hidden">
+    <div id="player-info" class="flex_wrap_centered">
+        <div class="flex_row_centered">
+            <p id="players-resume">{{ include.player_label }}</p>
+            <select id="player-name" {% if include.readonly %}disabled{% endif %}></select>
+        </div>
+        <div class="flex_row_centered">
+            <p>Job : </p>
+            <select id="player-job" {% if include.readonly %}disabled{% endif %} ></select>
+        </div>
+        {% include attribute.html readonly=include.readonly id="resistance" title="Résistance à l'IZAS" img="../img/header.png" value=4 maximum=4 total=4 %}
+        {% include attribute.html readonly=include.readonly id="sanity" title="Moral" img="../img/sanity.png" value=4 maximum=4 total=4 %}
+        {% include attribute.html readonly=include.readonly id="physical" title="Physique" img="../img/attr_physical.svg" readonly_total=true %}
+        {% include attribute.html readonly=include.readonly id="social" title="Social" img="../img/attr_social.svg" readonly_total=true %}
+        {% include attribute.html readonly=include.readonly id="mental" title="Mental" img="../img/attr_mental.svg" readonly_total=true %}
+        {% unless include.readonly %}
+        <div class="flex_row_centered">
+            <input id="player-map-allowed" type="checkbox"/>
+            <label for="player-map-allowed">Map allowed</label>
+        </div>
+        {% endunless %}
+    </div>
+    <div class="flex_row_left">
+        {% if include.readonly %}
+        <div class="flex_column_centered">
+            <div id="current-die"></div>
+            <div class="flex_row_centered">
+                <input id="die-max" type="number" value="6" min="1" max="100" size="4" />
+                <input id="roll-die" type="button" value="Lancer"/>
+            </div>
+        </div>
+        {% endif %}
+        <div class="flex_column_centered" id="dice-history-parent">
+            <label for="dice-history">Lancés de dés :</label>
+            <textarea id="dice-history" readonly></textarea>
+        </div>
+    </div>
+    <div class="flex_column_centered">
+        <label for="notes-input">Notes :</label>
+        <textarea autocomplete="off" id="notes-input" name="notes-input" maxlength="1024" rows="25"></textarea>
+        <div class="flex_row_right hint" style="width: 100%;">
+            <p id="notes-current-count">0</p>
+            <p>&#160/&#160</p>
+            <p id="notes-max-count">1024</p>
+            <p>&#160car.</p>
+        </div>
+    </div>
+</div>

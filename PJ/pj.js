@@ -15,7 +15,7 @@ function showMaps(mapEnabled)
     
     if (!mapEnabled) {
         split_obj = Split(
-            ['#pano', '#notes'],
+            ['#pano', '#right-panel'],
             {
                 minSize: [200, 0],
                 snapOffset: 100,
@@ -26,7 +26,7 @@ function showMaps(mapEnabled)
     }
     else {
         split_obj = Split(
-            ['#map', '#pano', '#notes'],
+            ['#map', '#pano', '#right-panel'],
             {
                 minSize: [0, 200, 0],
                 snapOffset: 100,

@@ -31,7 +31,7 @@ function initializeMJ() {
     );
     map.setStreetView(panorama);
     Split(
-        ['#map', '#pano', '#notes'],
+        ['#map', '#pano', '#right-panel'],
         {
             minSize: [0, 200, 0],
             snapOffset: 100,
@@ -237,12 +237,11 @@ function initializeMJ() {
     firebase.parties[partyID].playerNames.addChangedListener((playersNames) => {
         var resume = "";
         Object.keys(playersNames).forEach(playerID => {
-            resume += playerID +
-                " (IZAS: " + firebase.parties[partyID].players[playerID].resistanceAttr.current.get() + "/" + firebase.parties[partyID].players[playerID].resistanceAttr.max.get() +
-                ", Sanity: " + firebase.parties[partyID].players[playerID].sanityAttr.current.get() + "/" + firebase.parties[partyID].players[playerID].sanityAttr.max.get() +
-                ", Physical: " + firebase.parties[partyID].players[playerID].physicalAttr.get() + ", Social: " + firebase.parties[partyID].players[playerID].socialAttr.get() + 
-                ", Mental: " + firebase.parties[partyID].players[playerID].mentalAttr.get() + 
-                ") : " + playerData.jobsList[firebase.parties[partyID].players[playerID].jobIDAttr.get()].job + "\n"
+            resume += "{0} (IZAS: {1}/{2}, Sanity: {3}/{4}, Physical: {5}, Social: {6}, Mental: {7}) : {8}\n".format( playerID,
+                    firebase.parties[partyID].players[playerID].resistanceAttr.current.get(), firebase.parties[partyID].players[playerID].resistanceAttr.max.get(),
+                    firebase.parties[partyID].players[playerID].sanityAttr.current.get(), firebase.parties[partyID].players[playerID].sanityAttr.max.get(),
+                    firebase.parties[partyID].players[playerID].physicalAttr.get(), firebase.parties[partyID].players[playerID].socialAttr.get(), firebase.parties[partyID].players[playerID].mentalAttr.get(),
+                    playerData.jobsList[firebase.parties[partyID].players[playerID].jobIDAttr.get()].job );
         });
         resume.trim();
         document.getElementById("players-resume").title = resume;
