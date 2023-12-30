@@ -55,6 +55,11 @@ h1, h2{
     height: 25px;
 }
 
+.xs-icon {
+    width: 15px;
+    height: 15px;
+}
+
 .flipped {
     -webkit-transform: scaleX(-1);
     transform: scaleX(-1);
@@ -123,6 +128,7 @@ input[type=number][size=1] { width: 1em; }
 input[type=number][size=2] { width: 2em; }
 input[type=number][size=3] { width: 3em; }
 input[type=number][size=4] { width: 4em; }
+input[type=number][size=5] { width: 5em; }
 
 select[disabled] {
     border: black;

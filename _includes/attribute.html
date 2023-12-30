@@ -23,4 +23,7 @@
             {% endif %}
             />
     {% endif %}
+    {% if include.readonly %}
+        <button id="player-{{ include.id | default:'physical' }}-roll"><img class="xs-icon" style="margin:0px;" src="../img/roll.svg"/></button>
+    {% endif %}
 </div>

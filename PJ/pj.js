@@ -1,4 +1,4 @@
-import { Firebase, BindInputToAttribute } from "../scripts/dbUtils.js";
+import { Firebase, BindInputToAttribute, DiceHistoryToString } from "../scripts/dbUtils.js";
 import * as mapUtils from "../scripts/mapUtils.js";
 import * as utils from "../scripts/utils.js";
 import { data as playerData, randomName } from "../scripts/player.js";
@@ -164,28 +164,26 @@ function initializePJ() {
     
     // dice history
     document.getElementById("current-die").innerHTML = Die(1);
-    utils.bindEvent(document.getElementById("roll-die"), "click", async () => {
-        // roll die
-        let max = document.getElementById("die-max").value;
-        let value = await RollDie(document.getElementById("current-die"), max, 1500, 100);
-        
-        // add to history
-        let diceHistory = firebase.parties[partyID].diceAttr.get();
-        diceHistory.unshift({ playerID:playerID, result:value, max:max, timestamp:Date.now() });
-        firebase.parties[partyID].diceAttr.set(diceHistory);
-    });
     firebase.parties[partyID].diceAttr.addChangedListener((diceHistory) => {
-        var diceHistoryStr = "";
-        diceHistory.forEach(history => {
-            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-            const date = new Date(history.timestamp);
-            if (history.playerID == playerID)
-                diceHistoryStr += history.playerID + " " + history.result + "/" + history.max + " " + date.toLocaleDateString("fr-FR", options) + "\n";
-            else
-                diceHistoryStr += history.playerID + " " + history.result + "/? " + date.toLocaleDateString("fr-FR", options) + "\n";
-        });
-        document.getElementById("dice-history").value = diceHistoryStr;
+        document.getElementById("dice-history").value = DiceHistoryToString(diceHistory, playerID);
     });
+    
+    // rolls
+    let RollSpecificDie = async (max, attributeName, diceAttr) =>
+    {
+        // roll die
+        let value = await RollDie(document.getElementById("current-die"), max, 1500, 100);
+
+        // add to history
+        let diceHistory = diceAttr.get();
+        diceHistory.unshift({ playerID:playerID, attributeName:attributeName, result:value, max:max, timestamp:Date.now() });
+        diceAttr.set(diceHistory);
+    }
+    utils.bindEvent(document.getElementById("player-resistance-roll"), "click", () => { RollSpecificDie(document.getElementById("player-resistance").value, "resist.", firebase.parties[partyID].diceAttr); });
+    utils.bindEvent(document.getElementById("player-sanity-roll"), "click", () => { RollSpecificDie(document.getElementById("player-sanity").value, "sanity", firebase.parties[partyID].diceAttr); });
+    utils.bindEvent(document.getElementById("player-physical-roll"), "click", () => { RollSpecificDie(100, "physical", firebase.parties[partyID].diceAttr); });
+    utils.bindEvent(document.getElementById("player-social-roll"), "click", () => { RollSpecificDie(100, "social", firebase.parties[partyID].diceAttr); });
+    utils.bindEvent(document.getElementById("player-mental-roll"), "click", () => { RollSpecificDie(100, "mental", firebase.parties[partyID].diceAttr); });
 }
 
 async function main() {

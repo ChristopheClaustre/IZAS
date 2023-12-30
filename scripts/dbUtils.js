@@ -409,3 +409,17 @@ export function BindInputToAttribute(_input, _attribute, _callback = () => {})
     if (!_input.readonly) utils.bindEvent(_input, 'change', () => _attribute.set(parseInt(_input.value)));
     _attribute.addChangedListener( (data) => { _input.value = data; _callback(); } );
 }
+
+export function DiceHistoryToString(diceHistory, your_playerID="MASTER")
+{
+    var diceHistoryStr = "";
+    diceHistory.forEach(history => {
+        const options = { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+        const date = new Date(history.timestamp);
+        if (history.playerID == your_playerID || your_playerID == "MASTER")
+            diceHistoryStr += "[{0}] {1} rolled {2} ({3}/{4})\n".format(date.toLocaleDateString("fr-FR", options), history.playerID, history.attributeName, history.result, history.max);
+        else
+            diceHistoryStr += "[{0}] {1} rolled {2}\n".format(date.toLocaleDateString("fr-FR", options), history.playerID, history.attributeName);
+    });
+    return diceHistoryStr;
+}

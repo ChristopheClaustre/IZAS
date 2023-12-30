@@ -1,4 +1,4 @@
-import { Firebase, BindInputToAttribute } from "../scripts/dbUtils.js";
+import { Firebase, BindInputToAttribute, DiceHistoryToString } from "../scripts/dbUtils.js";
 import * as utils from "../scripts/utils.js";
 import { data as playerData, randomName } from "../scripts/player.js";
 import { data as defaultData } from "../scripts/default.js";
@@ -263,13 +263,7 @@ function initializeMJ() {
     
     // dice history
     firebase.parties[partyID].diceAttr.addChangedListener((diceHistory) => {
-        var diceHistoryStr = "";
-        diceHistory.forEach(history => {
-            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-            const date = new Date(history.timestamp);
-            diceHistoryStr += history.playerID + " " + history.result + "/" + history.max + " " + date.toLocaleDateString("fr-FR", options) + "\n";
-        });
-        document.getElementById("dice-history").innerHTML = diceHistoryStr;
+        document.getElementById("dice-history").innerHTML = DiceHistoryToString(diceHistory);
     });
 }
 
