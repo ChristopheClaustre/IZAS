@@ -24,9 +24,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.60892907"
-     inkscape:cx="312.84432"
-     inkscape:cy="341.5833"
+     inkscape:zoom="3.444623"
+     inkscape:cx="40.497901"
+     inkscape:cy="371.01303"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
      inkscape:window-x="1912"
@@ -636,6 +636,42 @@
          y="-93.263924"
          rx="0.15535985"
          transform="rotate(90)" />
+    </g>
+    <g
+       id="g1065"
+       inkscape:label="roll"
+       transform="rotate(14.417341,20.824244,104.41867)"
+       inkscape:export-filename="roll.svg"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96">
+      <rect
+         style="fill:#b50000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stop-color:#000000"
+         id="rect307"
+         width="20"
+         height="20"
+         x="10.862649"
+         y="94.722313" />
+      <ellipse
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stop-color:#000000"
+         id="path361"
+         cx="15.481698"
+         cy="99.392563"
+         rx="1.9970739"
+         ry="2.0354791" />
+      <ellipse
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stop-color:#000000"
+         id="path361-8"
+         cx="20.757507"
+         cy="104.67493"
+         rx="1.9970739"
+         ry="2.0354791" />
+      <ellipse
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stop-color:#000000"
+         id="path361-6"
+         cx="26.249855"
+         cy="110.04855"
+         rx="1.9970739"
+         ry="2.0354791" />
     </g>
   </g>
 </svg>
